@@ -1,0 +1,32 @@
+{
+  "taskId": "0x5a70f6270df1bef3d5a4f45a8c3619174c0529433cf729f9081ada8fd1f4f61f",
+  "worker": "0x639EeCAA3418AfbAB34A3c5B44cC14A9045D7429",
+  "schemaVersion": "1.1.0",
+  "timestamp": "2026-05-18T22:50:13.934Z",
+  "decision": {
+    "marketType": "task-assignment",
+    "instrumentId": "0x5a70f6270df1bef3d5a4f45a8c3619174c0529433cf729f9081ada8fd1f4f61f",
+    "action": "execute",
+    "notionalUsd": 1,
+    "confidenceBps": 9200,
+    "timeHorizonSec": 300,
+    "expectedValueBps": 450,
+    "resolver": {
+      "kind": "validator",
+      "reference": "s3-validator-v1"
+    }
+  },
+  "plan": [
+    "Fetch assignment context",
+    "Execute deterministic work unit",
+    "Verify output invariants"
+  ],
+  "result": {
+    "success": true,
+    "outputHash": "0x879bf8210d6092902e2e5f41c8347b74c7443e3d74b4d2af145c337b74d73e73",
+    "details": "Execution completed within policy bounds"
+  },
+  "integrity": {
+    "malformed": false
+  }
+}

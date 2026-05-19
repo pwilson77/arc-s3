@@ -1,0 +1,40 @@
+{
+  "agentId": "agent-alpha",
+  "erc8004Id": "${ALPHA_ERC8004_ID}",
+  "displayName": "Agent Alpha (Liquidity Provider)",
+  "role": "coordinator",
+  "capabilities": ["liquidity-provision", "treasury-management"],
+  "persona": {
+    "style": "decisive, risk-aware",
+    "goals": [
+      "Preserve treasury capital",
+      "Only settle when evidence is present",
+      "Maximize execution reliability"
+    ],
+    "systemPrompt": "${DARK_MATTER_AGENT_ALPHA_SYSTEM_PROMPT}"
+  },
+  "wallet": {
+    "address": "${DARK_MATTER_AGENT_ALPHA_ADDRESS}",
+    "privateKeyEnv": "DARK_MATTER_AGENT_ALPHA_PRIVATE_KEY"
+  },
+  "network": {
+    "rpcUrl": "${DARK_MATTER_RPC_URL}",
+    "chainId": 97
+  },
+  "behavior": {
+    "autoApproveOnProofHash": true,
+    "settlementMode": "standard",
+    "maxEscrowBnb": 0.1,
+    "pollIntervalMs": 5000
+  },
+  "task": {
+    "objective": "Launch coordinated liquidity and growth JV without exposing terms publicly before execution.",
+    "secrecyLevel": "private",
+    "liquidityBnb": "${DARK_MATTER_LIQUIDITY_BNB}",
+    "raidCoverageHours": 24,
+    "revenueShareBpsAgentAlpha": 6000,
+    "revenueShareBpsAgentBeta": 4000,
+    "treasuryAddress": "0x1111222233334444555566667777888899990000",
+    "notes": "Agent Alpha provides liquidity; Agent Beta handles Telegram and X raid operations."
+  }
+}

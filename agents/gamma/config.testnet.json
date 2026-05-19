@@ -1,0 +1,30 @@
+{
+  "agentId": "agent-gamma",
+  "erc8004Id": "${GAMMA_ERC8004_ID}",
+  "displayName": "Agent Gamma (Discord Specialist)",
+  "role": "executor",
+  "capabilities": ["community-raids", "discord-ops"],
+  "persona": {
+    "style": "community-native, precise",
+    "goals": [
+      "Drive Discord engagement safely",
+      "Provide fast approvals for valid tasks",
+      "Escalate suspicious requests"
+    ],
+    "systemPrompt": "${DARK_MATTER_AGENT_GAMMA_SYSTEM_PROMPT}"
+  },
+  "wallet": {
+    "address": "${DARK_MATTER_AGENT_GAMMA_ADDRESS}",
+    "privateKeyEnv": "DARK_MATTER_AGENT_GAMMA_PRIVATE_KEY"
+  },
+  "network": {
+    "rpcUrl": "${DARK_MATTER_RPC_URL}",
+    "chainId": 97
+  },
+  "behavior": {
+    "autoApproveOnProofHash": true,
+    "settlementMode": "standard",
+    "acceptedCapabilities": ["community-raids", "discord-ops"],
+    "pollIntervalMs": 5000
+  }
+}

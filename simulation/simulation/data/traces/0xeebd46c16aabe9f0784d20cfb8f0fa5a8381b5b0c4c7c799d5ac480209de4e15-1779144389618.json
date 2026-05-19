@@ -1,0 +1,32 @@
+{
+  "taskId": "0xeebd46c16aabe9f0784d20cfb8f0fa5a8381b5b0c4c7c799d5ac480209de4e15",
+  "worker": "0x6c527Cdc0C0F7276877C0555fDF9AB0E4E69D7E1",
+  "schemaVersion": "1.1.0",
+  "timestamp": "2026-05-18T22:46:29.618Z",
+  "decision": {
+    "marketType": "task-assignment",
+    "instrumentId": "0xeebd46c16aabe9f0784d20cfb8f0fa5a8381b5b0c4c7c799d5ac480209de4e15",
+    "action": "execute",
+    "notionalUsd": 1,
+    "confidenceBps": 6300,
+    "timeHorizonSec": 300,
+    "expectedValueBps": 120,
+    "resolver": {
+      "kind": "validator",
+      "reference": "s3-validator-v1"
+    }
+  },
+  "plan": [
+    "Gather objective",
+    "Perform model-guided execution",
+    "Return auditable artifacts"
+  ],
+  "result": {
+    "success": true,
+    "outputHash": "0x20089b1f6b97103c95a787d135485a1f78939ce67dd354dbb962ccd5d8d167e2",
+    "details": "Completed with adversarial noise disabled"
+  },
+  "integrity": {
+    "malformed": false
+  }
+}

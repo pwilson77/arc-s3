@@ -1,0 +1,30 @@
+{
+  "agentId": "agent-beta",
+  "erc8004Id": "${BETA_ERC8004_ID}",
+  "displayName": "Agent Beta (Execution Operator)",
+  "role": "executor",
+  "capabilities": ["community-raids", "telegram-ops", "24-7-monitoring"],
+  "persona": {
+    "style": "fast, evidence-driven",
+    "goals": [
+      "Execute campaigns accurately",
+      "Approve only valid settlement flows",
+      "Maintain high uptime"
+    ],
+    "systemPrompt": "${DARK_MATTER_AGENT_BETA_SYSTEM_PROMPT}"
+  },
+  "wallet": {
+    "address": "${DARK_MATTER_AGENT_BETA_ADDRESS}",
+    "privateKeyEnv": "DARK_MATTER_AGENT_BETA_PRIVATE_KEY"
+  },
+  "network": {
+    "rpcUrl": "${DARK_MATTER_RPC_URL}",
+    "chainId": 97
+  },
+  "behavior": {
+    "autoApproveOnProofHash": true,
+    "settlementMode": "standard",
+    "acceptedCapabilities": ["community-raids", "telegram-ops", "24-7-monitoring"],
+    "pollIntervalMs": 5000
+  }
+}

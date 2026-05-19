@@ -1,0 +1,159 @@
+
+> @arc-s3/ui@0.1.0 build
+> next build
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+  ▲ Next.js 14.2.5
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/4) ...
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at Z (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:5430)
+    at I (/workspace/projects/arc-s3/ui/.next/server/chunks/818.js:6:1263)
+    at renderWithHooks (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at finishClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5688:3)
+    at renderClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5696:3)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5954:7)
+
+Error occurred prerendering page "/404". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at Z (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:5430)
+    at I (/workspace/projects/arc-s3/ui/.next/server/chunks/818.js:6:1263)
+    at renderWithHooks (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at finishClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5688:3)
+    at renderClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5696:3)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5954:7)
+   Generating static pages (1/4) 
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at Z (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:5430)
+    at I (/workspace/projects/arc-s3/ui/.next/server/chunks/818.js:6:1263)
+    at renderWithHooks (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at finishClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5688:3)
+    at renderClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5696:3)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5954:7)
+
+Error occurred prerendering page "/500". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at Z (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:5430)
+    at I (/workspace/projects/arc-s3/ui/.next/server/chunks/818.js:6:1263)
+    at renderWithHooks (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at finishClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5688:3)
+    at renderClassComponent (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5696:3)
+    at renderElement (/workspace/projects/arc-s3/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5954:7)
+   Generating static pages (2/4) 
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:109363)
+    at d (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:22069)
+    at h (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:13989)
+    at au (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:10446)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:15122
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+    at a_ (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49776)
+    at ab (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:11808)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16871
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908) {
+  digest: '1419983260'
+}
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:109363)
+    at d (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:22069)
+    at h (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:13989)
+    at au (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:10446)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:15122
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+    at a_ (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49776)
+    at ab (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:11808)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16871
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+
+Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
+
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:109363)
+    at d (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:22069)
+    at h (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:13989)
+    at au (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:10446)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:15122
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+    at a_ (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49776)
+    at ab (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:11808)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16871
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+   Generating static pages (3/4) 
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:109363)
+    at d (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:22069)
+    at h (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:13989)
+    at au (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:10446)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:15122
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+    at a_ (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49776)
+    at ab (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:11808)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16871
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908) {
+  digest: '1419983260'
+}
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:109363)
+    at d (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:22069)
+    at h (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:13989)
+    at au (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:10446)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:15122
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+    at a_ (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49776)
+    at ab (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:11808)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16871
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+
+Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:109363)
+    at d (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:22069)
+    at h (/workspace/projects/arc-s3/ui/.next/server/chunks/379.js:1:13989)
+    at au (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:10446)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:15122
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+    at a_ (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:49776)
+    at ab (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:11808)
+    at /workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16871
+    at aw (/workspace/projects/arc-s3/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:35:16908)
+ ✓ Generating static pages (4/4)
+
+> Export encountered errors on following paths:
+	/_error: /404
+	/_error: /500
+	/_not-found/page: /_not-found
+	/page: /
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path /workspace/projects/arc-s3/ui
+npm error workspace @arc-s3/ui@0.1.0
+npm error location /workspace/projects/arc-s3/ui
+npm error command failed
+npm error command sh -c next build

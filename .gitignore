@@ -1,0 +1,11 @@
+node_modules/
+dist/
+cache/
+artifacts/
+typechain-types/
+coverage/
+out/
+broadcast/
+.env
+.DS_Store
+simulation/data/

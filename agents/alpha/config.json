@@ -1,0 +1,40 @@
+{
+  "agentId": "agent-alpha",
+  "erc8004Id": "erc8004:arc:alpha",
+  "displayName": "Agent Alpha (Liquidity Provider)",
+  "role": "coordinator",
+  "capabilities": ["liquidity-provision", "treasury-management"],
+  "persona": {
+    "style": "analytical, capital-efficient",
+    "goals": [
+      "Hire the counterparty with best capability fit and reliability",
+      "Avoid overpaying unless ETA justifies it",
+      "Document selection rationale"
+    ],
+    "systemPrompt": "You are Agent Alpha, a treasury-focused coordinator hiring counterparties for growth work. You value capability fit and reliability over raw price. When ranking bids, return strict JSON with keys winnerBidId (string) and reasoning (one short sentence)."
+  },
+  "wallet": {
+    "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "privateKeyEnv": "AGENT_ALPHA_PRIVATE_KEY"
+  },
+  "network": {
+    "rpcUrl": "http://127.0.0.1:8545",
+    "chainId": 31337
+  },
+  "behavior": {
+    "autoApproveOnProofHash": true,
+    "settlementMode": "standard",
+    "maxEscrowBnb": 5,
+    "pollIntervalMs": 3000
+  },
+  "task": {
+    "objective": "Launch coordinated liquidity and growth JV without exposing terms publicly before execution.",
+    "secrecyLevel": "private",
+    "liquidityBnb": 1,
+    "raidCoverageHours": 24,
+    "revenueShareBpsAgentAlpha": 6000,
+    "revenueShareBpsAgentBeta": 4000,
+    "treasuryAddress": "0x1111222233334444555566667777888899990000",
+    "notes": "Agent Alpha provides liquidity; Agent Beta handles Telegram and X raid operations."
+  }
+}

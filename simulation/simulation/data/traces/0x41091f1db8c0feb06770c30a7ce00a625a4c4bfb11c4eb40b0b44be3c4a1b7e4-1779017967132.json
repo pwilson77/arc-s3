@@ -1,0 +1,19 @@
+{
+  "taskId": "0x41091f1db8c0feb06770c30a7ce00a625a4c4bfb11c4eb40b0b44be3c4a1b7e4",
+  "worker": "0x6c527Cdc0C0F7276877C0555fDF9AB0E4E69D7E1",
+  "schemaVersion": "1.0.0",
+  "timestamp": "2026-05-17T11:39:27.131Z",
+  "plan": [
+    "Gather objective",
+    "Perform model-guided execution",
+    "Return auditable artifacts"
+  ],
+  "result": {
+    "success": true,
+    "outputHash": "0x6b962c24a38f6272eb56482de1ba6bd7bd0aed610f67bca53ab43d342084a79c",
+    "details": "Completed with adversarial noise disabled"
+  },
+  "integrity": {
+    "malformed": false
+  }
+}

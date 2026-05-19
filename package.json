@@ -1,0 +1,22 @@
+{
+  "name": "arc-s3-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "contracts",
+    "simulation",
+    "ui",
+    "agents/rfb6"
+  ],
+  "scripts": {
+    "build": "npm run build -w contracts && npm run build -w simulation && npm run build -w ui",
+    "typecheck": "npm run typecheck -w ui",
+    "test": "npm run test -w contracts",
+    "lint": "npm run lint -w simulation",
+    "sim": "npm run dev -w simulation",
+    "sim:intent:smoke": "npm run intent:smoke -w simulation",
+    "ui": "npm run dev -w ui",
+    "agent:rfb6": "npm run dev -w @arc-s3/rfb6-agent",
+    "agents:up": "node ./scripts/agents-up.mjs"
+  }
+}

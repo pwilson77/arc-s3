@@ -1,0 +1,19 @@
+{
+  "taskId": "0xdf4f3419fede5d38cf0aec7e9fcbaea9daf3caf62cd00e36782865aa67a18794",
+  "worker": "0x639EeCAA3418AfbAB34A3c5B44cC14A9045D7429",
+  "schemaVersion": "1.0.0",
+  "timestamp": "2026-05-17T11:43:17.590Z",
+  "plan": [
+    "Fetch assignment context",
+    "Execute deterministic work unit",
+    "Verify output invariants"
+  ],
+  "result": {
+    "success": true,
+    "outputHash": "0xd076ec2e89806ccdc13afa21c8c12b517201040f2ab6494c810fd0e0432c1af9",
+    "details": "Execution completed within policy bounds"
+  },
+  "integrity": {
+    "malformed": false
+  }
+}
