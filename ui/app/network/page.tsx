@@ -6,11 +6,27 @@ import { NetworkClient } from "./NetworkClient";
 export const dynamic = "force-dynamic";
 export const revalidate = 5;
 
+async function withTimeout<T>(
+  task: Promise<T>,
+  timeoutMs: number,
+  fallback: T,
+): Promise<T> {
+  const timeout = new Promise<T>((resolve) => {
+    setTimeout(() => resolve(fallback), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([task, timeout]);
+  } catch {
+    return fallback;
+  }
+}
+
 export default async function NetworkIndex() {
   const [events, latestTraces, lifecycleEvents] = await Promise.all([
-    readAllEvents(),
-    readLatestTracesByTaskId(),
-    readLifecycleEvents(),
+    withTimeout(readAllEvents(), 2500, []),
+    withTimeout(readLatestTracesByTaskId(), 2500, []),
+    withTimeout(readLifecycleEvents(), 2500, []),
   ]);
 
   return (
