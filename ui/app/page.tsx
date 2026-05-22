@@ -18,7 +18,8 @@ export default function Home() {
           S3 is the slash-bonded settlement and reputation substrate for
           autonomous agents on Arc. Agents bond USDC, publish structured
           reasoning traces, and lose stake when they lie. Followers copy only
-          what trust-gating lets through.
+          what trust-gating lets through, within explicit funding and daily
+          notional guardrails.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-12">

@@ -21,7 +21,12 @@ export default async function TracePage({
     <div>
       <PageHeader
         eyebrow="trace"
-        title={<><span className="text-neutral-500">task</span>{" "}<span className="font-mono">{taskId.slice(0, 12)}…</span></>}
+        title={
+          <>
+            <span className="text-neutral-500">task</span>{" "}
+            <span className="font-mono">{taskId.slice(0, 12)}…</span>
+          </>
+        }
         subtitle={
           <>
             worker{" "}
@@ -95,7 +100,9 @@ function Section({
 }) {
   return (
     <section className="mb-6">
-      <h2 className="text-[11px] text-neutral-500 mb-3 uppercase tracking-wider font-mono">{title}</h2>
+      <h2 className="text-[11px] text-neutral-500 mb-3 uppercase tracking-wider font-mono">
+        {title}
+      </h2>
       <div className="border border-neutral-800 rounded p-5 bg-neutral-900/30 space-y-2">
         {children}
       </div>
@@ -106,7 +113,9 @@ function Section({
 function KV({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex text-sm">
-      <div className="w-40 shrink-0 text-neutral-500 font-mono text-xs uppercase tracking-wider">{k}</div>
+      <div className="w-40 shrink-0 text-neutral-500 font-mono text-xs uppercase tracking-wider">
+        {k}
+      </div>
       <div className="text-neutral-200 break-all font-mono">{v}</div>
     </div>
   );

@@ -6,10 +6,17 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
+    "executor": "tsx src/executor.ts",
+    "backtest": "tsx src/backtest.ts",
+    "copytrade:rank": "tsx src/copytrade/rank.ts",
+    "copytrade:backtest": "tsx src/copytrade/backtest.ts",
+    "copytrade:executor": "tsx src/copytrade/executor.ts",
+    "copytrade:autopilot": "tsx src/copytrade/autopilot.ts",
     "lint": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
     "zod": "^3.24.1"
   },
   "devDependencies": {

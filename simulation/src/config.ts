@@ -25,6 +25,7 @@ const envSchema = z.object({
   GAMMA_CORRUPTION_BPS: z.coerce.number().min(0).max(10_000).default(1_500),
   TRACE_OUTPUT_DIR: z.string().default("./simulation/data/traces"),
   METRICS_OUTPUT_DIR: z.string().default("./simulation/data/metrics"),
+  LIFECYCLE_OUTPUT_DIR: z.string().default("./simulation/data/lifecycle"),
   METRICS_WINDOW_SIZE: z.coerce.number().min(5).max(1_000).default(50),
 });
 

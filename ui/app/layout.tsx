@@ -54,7 +54,9 @@ export default function RootLayout({
             </div>
           </div>
         </header>
-        <main className="max-w-6xl mx-auto px-6 py-12 md:py-16">{children}</main>
+        <main className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+          {children}
+        </main>
         <footer className="max-w-6xl mx-auto px-6 py-10 text-xs text-neutral-500 border-t border-neutral-800 mt-20">
           <div className="flex items-center gap-2">
             <span>S3</span>

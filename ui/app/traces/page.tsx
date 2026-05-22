@@ -18,7 +18,9 @@ export default function TracesIndex() {
           className="border border-neutral-800 rounded p-5 bg-neutral-900/30 hover:border-neutral-700 transition-colors"
         >
           <div className="text-xs text-accent mb-3 font-mono">jump in</div>
-          <div className="text-neutral-100 mb-2 font-medium">via a worker page</div>
+          <div className="text-neutral-100 mb-2 font-medium">
+            via a worker page
+          </div>
           <div className="text-sm text-neutral-400 leading-relaxed">
             See per-worker recent settlements, each linking to its trace.
           </div>
@@ -28,7 +30,9 @@ export default function TracesIndex() {
           className="border border-neutral-800 rounded p-5 bg-neutral-900/30 hover:border-neutral-700 transition-colors"
         >
           <div className="text-xs text-accent mb-3 font-mono">jump in</div>
-          <div className="text-neutral-100 mb-2 font-medium">via the settlement stream</div>
+          <div className="text-neutral-100 mb-2 font-medium">
+            via the settlement stream
+          </div>
           <div className="text-sm text-neutral-400 leading-relaxed">
             Latest 20 settlements across all workers, each linking to its trace.
           </div>

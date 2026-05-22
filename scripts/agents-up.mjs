@@ -73,8 +73,16 @@ function shutdown(exitCode = 0) {
 process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
 
-console.log(`${prefix("launcher", GRAY)} starting Alpha/Beta/Gamma simulation + RFB6 agent`);
+console.log(
+  `${prefix(
+    "launcher",
+    GRAY,
+  )} starting Alpha/Beta/Gamma simulation + RFB6 signer + executor + on-chain autopilot + RFB5 arb`,
+);
 console.log(`${prefix("launcher", GRAY)} press Ctrl+C to stop all processes`);
 
 launch("sim", BLUE, "npm", ["run", "sim"]);
 launch("rfb6", GREEN, "npm", ["run", "agent:rfb6"]);
+launch("rfb6-x", GREEN, "npm", ["run", "agent:rfb6:executor"]);
+launch("rfb6-auto", GREEN, "npm", ["run", "agent:rfb6:autopilot"]);
+launch("rfb5", GREEN, "npm", ["run", "agent:rfb5"]);

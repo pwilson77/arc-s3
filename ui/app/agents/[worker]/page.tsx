@@ -60,7 +60,14 @@ export default async function AgentPage({
           eyebrow={`${registered.kind} · registered`}
           title={<span className="font-mono">{registered.id}</span>}
           subtitle={registered.summary}
-          action={{ href: "/agents", label: "all agents →" }}
+          action={
+            registered.id === "rfb6"
+              ? {
+                  href: "/agents/rfb6/copytrade",
+                  label: "view copytrade dashboard →",
+                }
+              : { href: "/agents", label: "all agents →" }
+          }
         />
 
         <div className="border border-neutral-800 rounded p-5 bg-neutral-900/30 mb-8">
@@ -83,13 +90,37 @@ export default async function AgentPage({
             status
           </div>
           <div className="text-sm text-neutral-400 leading-relaxed">
-            No settlement metrics yet for this worker. Once validator events are written to
-            <span className="font-mono"> validator-metrics.jsonl</span>, this page will show score history and gating outcomes.
+            {registered.id === "rfb6" ? (
+              <span>
+                As a standalone social-intelligence allocator process, rfb6 has
+                a dedicated copy-trading dashboard that displays ranked wallets,
+                signed allocations, and active trade intelligence.
+              </span>
+            ) : (
+              <span>
+                No settlement metrics yet for this worker. Once validator events
+                are written to
+                <span className="font-mono"> validator-metrics.jsonl</span>,
+                this page will show score history and gating outcomes.
+              </span>
+            )}
           </div>
           <div className="mt-4">
-            <Link href="/dashboard" className="text-sm text-neutral-200 hover:underline">
-              view dashboard →
-            </Link>
+            {registered.id === "rfb6" ? (
+              <Link
+                href="/agents/rfb6/copytrade"
+                className="text-sm text-neutral-200 hover:underline"
+              >
+                Go to Copytrade Dashboard →
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard"
+                className="text-sm text-neutral-200 hover:underline"
+              >
+                view dashboard →
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -115,8 +146,8 @@ export default async function AgentPage({
           verdict.eligible
             ? "This worker passes the trust gate. Followers can copy from it."
             : verdict.reasons.length > 0
-              ? `Gated: ${verdict.reasons.join(", ")}.`
-              : "This worker does not pass the trust gate right now."
+            ? `Gated: ${verdict.reasons.join(", ")}.`
+            : "This worker does not pass the trust gate right now."
         }
         action={{ href: "/agents", label: "all workers →" }}
       />
@@ -135,12 +166,16 @@ export default async function AgentPage({
       </div>
 
       <section className="mb-12">
-        <h2 className="text-[11px] text-neutral-500 mb-3 uppercase tracking-wider font-mono">score history</h2>
+        <h2 className="text-[11px] text-neutral-500 mb-3 uppercase tracking-wider font-mono">
+          score history
+        </h2>
         <Sparkline values={scores} />
       </section>
 
       <section>
-        <h2 className="text-[11px] text-neutral-500 mb-3 uppercase tracking-wider font-mono">recent settlements</h2>
+        <h2 className="text-[11px] text-neutral-500 mb-3 uppercase tracking-wider font-mono">
+          recent settlements
+        </h2>
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left text-[11px] text-neutral-500 uppercase tracking-wider font-mono border-b border-neutral-800">
@@ -171,7 +206,11 @@ export default async function AgentPage({
                 </td>
                 <td className="py-2 pr-4">
                   <span
-                    className={e.valid ? "text-emerald-400 font-mono" : "text-rose-400 font-mono"}
+                    className={
+                      e.valid
+                        ? "text-emerald-400 font-mono"
+                        : "text-rose-400 font-mono"
+                    }
                   >
                     {e.valid ? "yes" : "no"}
                   </span>
@@ -197,8 +236,12 @@ export default async function AgentPage({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-neutral-800 rounded p-4 bg-neutral-900/30">
-      <div className="text-[11px] text-neutral-500 uppercase tracking-wider font-mono">{label}</div>
-      <div className="text-2xl text-neutral-50 mt-1 font-mono tabular">{value}</div>
+      <div className="text-[11px] text-neutral-500 uppercase tracking-wider font-mono">
+        {label}
+      </div>
+      <div className="text-2xl text-neutral-50 mt-1 font-mono tabular">
+        {value}
+      </div>
     </div>
   );
 }

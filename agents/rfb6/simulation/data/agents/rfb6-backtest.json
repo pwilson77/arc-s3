@@ -1,0 +1,17 @@
+{
+  "version": "rfb6-backtest/v1",
+  "generatedAt": "2026-05-20T10:17:15.596Z",
+  "inputFile": "./simulation/data/metrics/validator-metrics.jsonl",
+  "totalEvents": 0,
+  "evaluationPoints": 0,
+  "gateViolationCount": 0,
+  "meanAllocatedNextEvBps": 0,
+  "meanBaselineNextEvBps": 0,
+  "meanUpliftBps": 0,
+  "meanAllocatedNextValidityBps": 0,
+  "meanBaselineNextValidityBps": 0,
+  "averageTurnoverBps": 0,
+  "averageActiveWorkers": 0,
+  "selectionCountByWorker": {},
+  "samples": []
+}

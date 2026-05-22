@@ -1,18 +1,26 @@
 import { PageHeader } from "../../_components/PageHeader";
-import { readRfb6Runs } from "@/lib/rfb6-agent";
+import {
+  readRfb6RunAudit,
+  readRfb6VerificationSummary,
+} from "@/lib/rfb6-agent";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 5;
 
 export default async function Rfb6AgentPage() {
-  const runs = await readRfb6Runs(40);
-  const latest = runs[runs.length - 1] ?? null;
-  const recent = [...runs].reverse().slice(0, 20);
+  const audited = await readRfb6RunAudit(40);
+  const summary = await readRfb6VerificationSummary(200);
+  const verifiedRuns = audited
+    .filter((entry) => entry.valid)
+    .map((entry) => entry.run);
+  const latest = verifiedRuns[verifiedRuns.length - 1] ?? null;
+  const recent = [...audited].reverse().slice(0, 20);
 
   if (!latest) {
     return (
       <div className="text-neutral-400 text-sm">
-        no rfb6 agent runs yet - start the standalone process with <span className="font-mono">npm run agent:rfb6</span>.
+        no verified rfb6 runs yet - start the signer process with{" "}
+        <span className="font-mono">npm run agent:rfb6</span>.
       </div>
     );
   }
@@ -22,8 +30,21 @@ export default async function Rfb6AgentPage() {
       <PageHeader
         eyebrow="agent · rfb6"
         title="Social trading intelligence process"
-        subtitle="Standalone process stream. Each run ingests validator metrics, computes trust-gated allocations, and emits a traceable JSONL event."
+        subtitle="Standalone process stream. Each run ingests validator metrics, computes trust-gated allocations, and emits a signed JSONL artifact."
+        action={{ href: "/agents/rfb6/copytrade", label: "copytrade →" }}
       />
+
+      <section className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+        <div className="border border-neutral-800 rounded p-3 bg-neutral-900/30">
+          attested runs: {summary.valid}
+        </div>
+        <div className="border border-neutral-800 rounded p-3 bg-neutral-900/30">
+          rejected runs: {summary.invalid}
+        </div>
+        <div className="border border-neutral-800 rounded p-3 bg-neutral-900/30 break-all">
+          publisher: {latest.publisher.erc8004Id}
+        </div>
+      </section>
 
       <section className="mb-12">
         <h2 className="text-[11px] text-neutral-500 mb-4 uppercase tracking-wider font-mono">
@@ -42,13 +63,28 @@ export default async function Rfb6AgentPage() {
           </thead>
           <tbody>
             {latest.workers.map((w) => (
-              <tr key={`${latest.runId}-${w.worker}`} className="border-b border-neutral-900">
-                <td className="py-3 pr-4 text-neutral-100 font-mono">{w.worker}</td>
-                <td className="py-3 pr-4 text-neutral-300 font-mono uppercase text-xs">{w.status}</td>
-                <td className="py-3 pr-4 text-neutral-200 font-mono tabular">{(w.weightBps / 100).toFixed(2)}%</td>
-                <td className="py-3 pr-4 text-neutral-200 font-mono tabular">{w.rawScore.toFixed(3)}</td>
-                <td className="py-3 pr-4 text-neutral-200 font-mono tabular">{(w.meanRecentEvBps / 100).toFixed(2)}%</td>
-                <td className="py-3 pr-4 text-neutral-500 text-xs">{w.reasons.join("; ") || "—"}</td>
+              <tr
+                key={`${latest.runId}-${w.worker}`}
+                className="border-b border-neutral-900"
+              >
+                <td className="py-3 pr-4 text-neutral-100 font-mono">
+                  {w.worker}
+                </td>
+                <td className="py-3 pr-4 text-neutral-300 font-mono uppercase text-xs">
+                  {w.status}
+                </td>
+                <td className="py-3 pr-4 text-neutral-200 font-mono tabular">
+                  {(w.weightBps / 100).toFixed(2)}%
+                </td>
+                <td className="py-3 pr-4 text-neutral-200 font-mono tabular">
+                  {w.rawScore.toFixed(3)}
+                </td>
+                <td className="py-3 pr-4 text-neutral-200 font-mono tabular">
+                  {(w.meanRecentEvBps / 100).toFixed(2)}%
+                </td>
+                <td className="py-3 pr-4 text-neutral-500 text-xs">
+                  {w.reasons.join("; ") || "—"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -67,17 +103,37 @@ export default async function Rfb6AgentPage() {
               <th className="py-2 pr-4 font-normal">source events</th>
               <th className="py-2 pr-4 font-normal">source latest</th>
               <th className="py-2 pr-4 font-normal">active workers</th>
+              <th className="py-2 pr-4 font-normal">attestation</th>
             </tr>
           </thead>
           <tbody>
-            {recent.map((run) => (
-              <tr key={run.runId} className="border-b border-neutral-900">
-                <td className="py-2 pr-4 text-neutral-500 font-mono tabular">{new Date(run.timestamp).toLocaleTimeString()}</td>
-                <td className="py-2 pr-4 text-neutral-200 font-mono">{run.runId.slice(0, 12)}…</td>
-                <td className="py-2 pr-4 text-neutral-300 font-mono tabular">{run.sourceEventCount}</td>
-                <td className="py-2 pr-4 text-neutral-300 font-mono tabular">{new Date(run.sourceLatestTimestamp).toLocaleTimeString()}</td>
+            {recent.map((entry) => (
+              <tr key={entry.run.runId} className="border-b border-neutral-900">
+                <td className="py-2 pr-4 text-neutral-500 font-mono tabular">
+                  {new Date(entry.run.timestamp).toLocaleTimeString()}
+                </td>
+                <td className="py-2 pr-4 text-neutral-200 font-mono">
+                  {entry.run.runId.slice(0, 12)}…
+                </td>
                 <td className="py-2 pr-4 text-neutral-300 font-mono tabular">
-                  {run.workers.filter((w) => w.weightBps > 0).length}
+                  {entry.run.sourceEventCount}
+                </td>
+                <td className="py-2 pr-4 text-neutral-300 font-mono tabular">
+                  {new Date(
+                    entry.run.sourceLatestTimestamp,
+                  ).toLocaleTimeString()}
+                </td>
+                <td className="py-2 pr-4 text-neutral-300 font-mono tabular">
+                  {entry.run.workers.filter((w) => w.weightBps > 0).length}
+                </td>
+                <td className="py-2 pr-4 font-mono">
+                  {entry.valid ? (
+                    <span className="text-emerald-400">valid</span>
+                  ) : (
+                    <span className="text-rose-400">
+                      invalid: {entry.reason ?? "unknown"}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

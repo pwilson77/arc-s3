@@ -7,5 +7,7 @@ coverage/
 out/
 broadcast/
 .env
+.env.local
 .DS_Store
 simulation/data/
+.agents/skills/

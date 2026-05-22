@@ -12,7 +12,7 @@ System_Ext(arc, "Arc L1", "Settlement chain")
 System_Ext(oracle, "Validator Oracle", "Single validator process")
 
 Container_Boundary(s3, "S3") {
-  Container(ui, "Next.js UI", "Next.js", "Dashboard, docs, and trace inspection")
+  Container(ui, "Next.js UI", "Next.js", "Dashboard, docs, lifecycle stream, task drill-down")
   Container(sim, "Simulation + Settlement Engine", "TypeScript", "Scores traces and submits settlement")
   ContainerDb(metrics, "Metrics Store", "JSONL", "Worker and validator telemetry")
 }
@@ -21,8 +21,35 @@ Rel(worker, sim, "Submits reasoning traces")
 Rel(sim, arc, "Settles and applies slash decisions")
 Rel(oracle, sim, "Resolves validity")
 Rel(sim, metrics, "Writes metrics")
-Rel(ui, metrics, "Reads snapshots")
+Rel(ui, metrics, "Reads traces, lifecycle snapshots, and settlement telemetry")
 Rel(follower, ui, "Inspects and decides copy")`;
+
+const LIFECYCLE_FLOW_DIAGRAM = `flowchart LR
+  worker[Worker Agent]
+  sim[Simulation + Settlement Engine]
+  oracle[Validator Oracle]
+  arc[Arc L1 Settlement]
+  metrics[(Metrics Store)]
+  ui[Network Lifecycle UI]
+  table[Settlement Stream Table]
+  modal[Task Details Modal]
+  follower[Follower]
+
+  worker -->|Submit signed trace| sim
+  oracle -->|Resolve validity| sim
+  sim -->|Settle task| arc
+  sim --> created[created]
+  created --> accepted[accepted]
+  accepted --> submitted[submitted]
+  submitted --> validated{validated}
+  validated -->|valid| released[release]
+  validated -->|invalid| slashed[slash]
+
+  sim -->|Write lifecycle + settlement telemetry| metrics
+  ui -->|Read traces + lifecycle + settlement telemetry| metrics
+  ui --> table
+  table -->|Open details| modal
+  follower -->|Inspect and decide copy| ui`;
 
 export default function AgentDocsPage() {
   return (
@@ -96,7 +123,43 @@ export default function AgentDocsPage() {
           and the UI fit together.
         </p>
         <div className="overflow-x-auto rounded border border-neutral-300 bg-white p-3">
-          <MermaidDiagram chart={C4_CONTAINER_DIAGRAM} className="min-w-[760px]" />
+          <MermaidDiagram
+            chart={C4_CONTAINER_DIAGRAM}
+            className="min-w-[760px]"
+          />
+        </div>
+      </Section>
+
+      <Section title="Operational Lifecycle Flow">
+        <p className="text-sm text-neutral-300 mb-3">
+          Dynamic view of task progression from trace submission through
+          validation to release/slash, including settlement telemetry ingestion
+          and task drill-down in the network modal.
+        </p>
+        <div className="overflow-x-auto rounded border border-neutral-300 bg-white p-3">
+          <MermaidDiagram
+            chart={LIFECYCLE_FLOW_DIAGRAM}
+            className="min-w-[980px]"
+          />
+        </div>
+        <div className="mt-3 text-xs text-neutral-400 space-y-1">
+          <div>
+            <span className="text-neutral-200 font-mono">stage nodes</span>:
+            created, accepted, submitted, validated represent on-chain lifecycle
+            checkpoints.
+          </div>
+          <div>
+            <span className="text-emerald-300 font-mono">valid → release</span>:
+            validator accepted the trace and settlement releases funds.
+          </div>
+          <div>
+            <span className="text-rose-300 font-mono">invalid → slash</span>:
+            validator rejected the trace and settlement applies slashing.
+          </div>
+          <div>
+            <span className="text-neutral-200 font-mono">table → modal</span>:
+            operator opens task drill-down from settlement stream rows.
+          </div>
         </div>
       </Section>
 
@@ -134,6 +197,31 @@ export default function AgentDocsPage() {
           <p>
             Workers failing eligibility gates stay visible with zero weight and
             explicit rationale.
+          </p>
+        </div>
+      </Section>
+
+      <Section title="RFB5 On-Chain Guardrails (Testnet)">
+        <div className="text-sm text-neutral-300 space-y-2">
+          <p>
+            RFB5 live execution is bounded by wallet funding and policy limits,
+            not only by strategy confidence.
+          </p>
+          <p>
+            The default intent deadline for RFB5 is 600 seconds to reduce
+            deadline-expiry reverts during live testnet conditions.
+          </p>
+          <p>
+            Payment sizing is balance-aware and may be skipped for
+            low-balance/min-payment violations.
+          </p>
+          <p>
+            Daily notional cap is an explicit brake. Cap exhaustion appears as
+            <span className="font-mono text-neutral-100">
+              {" "}
+              daily-notional-cap{" "}
+            </span>
+            in executor skip reasons.
           </p>
         </div>
       </Section>
@@ -182,8 +270,12 @@ function Section({
 }) {
   return (
     <section className="mb-10">
-      <h2 className="text-[11px] text-neutral-500 mb-4 uppercase tracking-wider font-mono">{title}</h2>
-      <div className="border border-neutral-800 rounded p-5 bg-neutral-900/30">{children}</div>
+      <h2 className="text-[11px] text-neutral-500 mb-4 uppercase tracking-wider font-mono">
+        {title}
+      </h2>
+      <div className="border border-neutral-800 rounded p-5 bg-neutral-900/30">
+        {children}
+      </div>
     </section>
   );
 }

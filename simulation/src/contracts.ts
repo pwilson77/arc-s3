@@ -41,7 +41,11 @@ export function firewallAs(
   ctx: AgentContext,
   signerKey: "alpha" | "beta" | "gamma",
 ): Contract {
-  return new Contract(config.S3_INTENT_FIREWALL, intentFirewallAbi, ctx[signerKey]);
+  return new Contract(
+    config.S3_INTENT_FIREWALL,
+    intentFirewallAbi,
+    ctx[signerKey],
+  );
 }
 
 export async function executeCourthouseIntent(

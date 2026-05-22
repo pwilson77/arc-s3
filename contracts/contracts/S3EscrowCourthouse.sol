@@ -17,12 +17,25 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
     error EscrowInvalidAddress();
     error EscrowInvalidAmount();
     error EscrowFirewallOnly();
+    error EscrowFeeTooHigh();
 
     event ValidatorUpdated(address indexed validator, bool enabled);
     event TaskCreated(bytes32 indexed taskId, address indexed employer, address indexed worker, uint256 paymentAmount, uint256 bondAmount);
+    event TaskCreatedV2(bytes32 indexed taskId, address indexed publisher, uint16 publisherFeeBps, uint16 validatorFeeBps);
     event TaskAccepted(bytes32 indexed taskId, address indexed worker);
     event TaskResultSubmitted(bytes32 indexed taskId, bytes32 traceHash, string ipfsURI);
     event TaskSettled(bytes32 indexed taskId, bool isValid, uint256 workerPayout, uint256 slashedBond);
+    event TaskSettledV2(
+        bytes32 indexed taskId,
+        bool isValid,
+        uint256 workerPayout,
+        uint256 publisherPayout,
+        uint256 validatorPayout,
+        uint256 slashedBond
+    );
+    event ValidatorFeeUpdated(uint16 validatorFeeBps);
+
+    uint16 public constant MAX_TOTAL_FEE_BPS = 5000;
 
     enum TaskStatus {
         None,
@@ -41,11 +54,15 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
         bytes32 traceHash;
         string ipfsURI;
         TaskStatus status;
+        address publisher;
+        uint16 publisherFeeBps;
+        uint16 validatorFeeBps;
     }
 
     IERC20 public immutable usdc;
     uint256 public nextTaskNonce;
     address public intentFirewall;
+    uint16 public validatorFeeBps;
 
     mapping(bytes32 => Task) public tasks;
     mapping(address => bool) public validators;
@@ -76,21 +93,30 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
         intentFirewall = firewall;
     }
 
+    function setValidatorFeeBps(uint16 bps) external onlyOwner {
+        if (bps > MAX_TOTAL_FEE_BPS) revert EscrowFeeTooHigh();
+        validatorFeeBps = bps;
+        emit ValidatorFeeUpdated(bps);
+    }
+
     function createTask(address worker, uint256 paymentAmount, uint256 performanceBondRequirement) external nonReentrant returns (bytes32 taskId) {
         if (worker == address(0)) revert EscrowInvalidAddress();
         if (paymentAmount == 0 || performanceBondRequirement == 0) revert EscrowInvalidAmount();
 
+        uint16 valFeeBps = validatorFeeBps;
         taskId = keccak256(abi.encodePacked(address(this), block.chainid, msg.sender, worker, nextTaskNonce++));
         Task storage t = tasks[taskId];
         t.employer = msg.sender;
         t.worker = worker;
         t.paymentAmount = paymentAmount;
         t.bondAmount = performanceBondRequirement;
+        t.validatorFeeBps = valFeeBps;
         t.status = TaskStatus.Created;
 
         usdc.safeTransferFrom(msg.sender, address(this), paymentAmount);
 
         emit TaskCreated(taskId, msg.sender, worker, paymentAmount, performanceBondRequirement);
+        emit TaskCreatedV2(taskId, address(0), 0, valFeeBps);
     }
 
     function acceptTask(bytes32 taskId) external nonReentrant {
@@ -126,10 +152,22 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
         t.status = TaskStatus.Settled;
 
         uint256 workerPayout;
+        uint256 publisherPayout;
+        uint256 validatorPayout;
         uint256 slashedBond;
         if (isValid) {
-            workerPayout = t.paymentAmount + t.bondAmount;
+            publisherPayout = (t.paymentAmount * t.publisherFeeBps) / 10_000;
+            validatorPayout = (t.paymentAmount * t.validatorFeeBps) / 10_000;
+            workerPayout = t.paymentAmount - publisherPayout - validatorPayout + t.bondAmount;
             usdc.safeTransfer(t.worker, workerPayout);
+            if (publisherPayout > 0 && t.publisher != address(0)) {
+                usdc.safeTransfer(t.publisher, publisherPayout);
+            } else {
+                publisherPayout = 0;
+            }
+            if (validatorPayout > 0) {
+                usdc.safeTransfer(msg.sender, validatorPayout);
+            }
         } else {
             workerPayout = t.paymentAmount;
             slashedBond = t.bondAmount;
@@ -137,6 +175,7 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
         }
 
         emit TaskSettled(taskId, isValid, workerPayout, slashedBond);
+        emit TaskSettledV2(taskId, isValid, workerPayout, publisherPayout, validatorPayout, slashedBond);
     }
 
     // Firewall-forwarded variants preserve agent identity while keeping policy checks in S3IntentFirewall.
@@ -146,13 +185,41 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
         onlyFirewall
         returns (bytes32 taskId)
     {
+        return _forwardCreate(employer, worker, address(0), paymentAmount, performanceBondRequirement, 0);
+    }
+
+    function forwardCreateTaskV2(
+        address employer,
+        address worker,
+        address publisher,
+        uint256 paymentAmount,
+        uint256 performanceBondRequirement,
+        uint16 publisherFeeBps
+    ) external nonReentrant onlyFirewall returns (bytes32 taskId) {
+        return _forwardCreate(employer, worker, publisher, paymentAmount, performanceBondRequirement, publisherFeeBps);
+    }
+
+    function _forwardCreate(
+        address employer,
+        address worker,
+        address publisher,
+        uint256 paymentAmount,
+        uint256 performanceBondRequirement,
+        uint16 publisherFeeBps
+    ) internal returns (bytes32 taskId) {
         if (employer == address(0) || worker == address(0)) revert EscrowInvalidAddress();
         if (paymentAmount == 0 || performanceBondRequirement == 0) revert EscrowInvalidAmount();
+        if (publisherFeeBps > 0 && publisher == address(0)) revert EscrowInvalidAddress();
+        uint16 valFeeBps = validatorFeeBps;
+        if (uint256(publisherFeeBps) + uint256(valFeeBps) > MAX_TOTAL_FEE_BPS) revert EscrowFeeTooHigh();
 
         taskId = keccak256(abi.encodePacked(address(this), block.chainid, employer, worker, nextTaskNonce++));
         Task storage t = tasks[taskId];
         t.employer = employer;
         t.worker = worker;
+        t.publisher = publisher;
+        t.publisherFeeBps = publisherFeeBps;
+        t.validatorFeeBps = valFeeBps;
         t.paymentAmount = paymentAmount;
         t.bondAmount = performanceBondRequirement;
         t.status = TaskStatus.Created;
@@ -160,6 +227,7 @@ contract S3EscrowCourthouse is Ownable, ReentrancyGuard {
         usdc.safeTransferFrom(employer, address(this), paymentAmount);
 
         emit TaskCreated(taskId, employer, worker, paymentAmount, performanceBondRequirement);
+        emit TaskCreatedV2(taskId, publisher, publisherFeeBps, valFeeBps);
     }
 
     function forwardAcceptTask(address worker, bytes32 taskId) external nonReentrant onlyFirewall {

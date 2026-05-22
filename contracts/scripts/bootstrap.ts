@@ -76,7 +76,11 @@ async function main(): Promise<void> {
         return;
       } catch {
         await (
-          await identityRegistry.registerAgent(erc8004Id, wallet, ethers.ZeroHash)
+          await identityRegistry.registerAgent(
+            erc8004Id,
+            wallet,
+            ethers.ZeroHash,
+          )
         ).wait();
         console.log(`identity registered: ${erc8004Id} -> ${wallet}`);
       }
@@ -96,7 +100,9 @@ async function main(): Promise<void> {
       await registerIfMissing(rfb6Erc8004Id, rfb6Address);
     }
   } else {
-    console.log("Skipping identity bootstrap: S3_AGENT_IDENTITY_REGISTRY is unset.");
+    console.log(
+      "Skipping identity bootstrap: S3_AGENT_IDENTITY_REGISTRY is unset.",
+    );
   }
 
   await (await firewall.setAgentRegistration(alphaAddress, true)).wait();
@@ -128,11 +134,26 @@ async function main(): Promise<void> {
   try {
     await (await courthouse.setIntentFirewall(firewallAddr)).wait();
   } catch (error) {
-    console.warn("Skipping courthouse firewall binding (setIntentFirewall failed):", error);
+    console.warn(
+      "Skipping courthouse firewall binding (setIntentFirewall failed):",
+      error,
+    );
   }
 
   await (await courthouse.setValidator(validatorAddress, true)).wait();
   await (await registry.setUpdater(validatorAddress, true)).wait();
+
+  const validatorFeeBpsRaw = process.env.VALIDATOR_FEE_BPS;
+  if (validatorFeeBpsRaw) {
+    const bps = Number(validatorFeeBpsRaw);
+    if (!Number.isFinite(bps) || bps < 0 || bps > 5000) {
+      throw new Error(
+        `VALIDATOR_FEE_BPS out of range (0-5000): ${validatorFeeBpsRaw}`,
+      );
+    }
+    await (await courthouse.setValidatorFeeBps(bps)).wait();
+    console.log(`validatorFeeBps=${bps}`);
+  }
 
   console.log("Bootstrap complete:");
   console.log(`owner=${owner.address}`);

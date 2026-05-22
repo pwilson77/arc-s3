@@ -6,6 +6,7 @@ import { config } from "./config.js";
 import { escrowAs, reputationAs } from "./contracts.js";
 import type { AgentContext } from "./context.js";
 import { appendMetricsEvent, ValidatorMetricsTracker } from "./metrics.js";
+import { appendLifecycleEventFromReceipt } from "./lifecycle.js";
 import {
   calibrationScoreAdjustment,
   clampScore,
@@ -84,9 +85,21 @@ export async function runValidatorLoop(
           [reasons, adjustedScore, computedHash],
         );
 
-        await (
+        const settleReceipt = await (
           await courthouse.settleTask(item.taskId, verdict.valid, proof)
         ).wait();
+        await appendLifecycleEventFromReceipt(
+          ctx,
+          config.LIFECYCLE_OUTPUT_DIR,
+          {
+            stage: "validated",
+            taskId: item.taskId,
+            actor: ctx.validator.address,
+            valid: verdict.valid,
+            reasons,
+          },
+          settleReceipt,
+        );
         const targetAgent =
           item.worker === "beta" ? ctx.beta.address : ctx.gamma.address;
         await (

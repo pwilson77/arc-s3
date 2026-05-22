@@ -1,4 +1,4 @@
-declare module "mermaid/dist/mermaid.esm.min.mjs" {
+declare module "mermaid/dist/mermaid.esm.mjs" {
   const mermaid: {
     initialize: (config: Record<string, unknown>) => void;
     render: (

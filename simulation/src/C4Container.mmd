@@ -6,7 +6,7 @@ System_Ext(arc, "Arc L1", "Settlement chain")
 System_Ext(oracle, "Validator Oracle", "Single validator process")
 
 Container_Boundary(s3, "S3") {
-  Container(ui, "Next.js UI", "Next.js", "Dashboard, docs, and trace inspection")
+  Container(ui, "Next.js UI", "Next.js", "Dashboard, docs, lifecycle stream, task drill-down")
   Container(sim, "Simulation + Settlement Engine", "TypeScript", "Scores traces and submits settlement")
   ContainerDb(metrics, "Metrics Store", "JSONL", "Worker and validator telemetry")
 }
@@ -15,5 +15,5 @@ Rel(worker, sim, "Submits reasoning traces")
 Rel(sim, arc, "Settles and applies slash decisions")
 Rel(oracle, sim, "Resolves validity")
 Rel(sim, metrics, "Writes metrics")
-Rel(ui, metrics, "Reads snapshots")
+Rel(ui, metrics, "Reads traces, lifecycle snapshots, and settlement telemetry")
 Rel(follower, ui, "Inspects and decides copy")

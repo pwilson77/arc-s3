@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { config } from "../config.js";
 import { executeCourthouseIntent, escrowAs, usdcAs } from "../contracts.js";
+import { appendLifecycleEventFromReceipt } from "../lifecycle.js";
 import type { AgentContext } from "../context.js";
 import { writeTrace } from "../reasoningStore.js";
 import type { TaskState } from "../state.js";
@@ -30,11 +31,25 @@ export async function runGammaLoop(
       task.bondAmount,
     );
     await approveTx.wait();
-    const acceptData = escrow.interface.encodeFunctionData("forwardAcceptTask", [
-      ctx.gamma.address,
-      task.taskId,
-    ]);
-    await executeCourthouseIntent(ctx, "gamma", acceptData);
+    const acceptData = escrow.interface.encodeFunctionData(
+      "forwardAcceptTask",
+      [ctx.gamma.address, task.taskId],
+    );
+    const acceptReceipt = await executeCourthouseIntent(
+      ctx,
+      "gamma",
+      acceptData,
+    );
+    await appendLifecycleEventFromReceipt(
+      ctx,
+      config.LIFECYCLE_OUTPUT_DIR,
+      {
+        stage: "accepted",
+        taskId: task.taskId,
+        actor: ctx.gamma.address,
+      },
+      acceptReceipt,
+    );
 
     const corrupted = shouldCorrupt(config.GAMMA_CORRUPTION_BPS);
     const trace: ReasoningTrace = {
@@ -80,7 +95,21 @@ export async function runGammaLoop(
       "forwardSubmitTaskResult",
       [ctx.gamma.address, task.taskId, traceHash, ipfsURI],
     );
-    await executeCourthouseIntent(ctx, "gamma", submitData);
+    const submitReceipt = await executeCourthouseIntent(
+      ctx,
+      "gamma",
+      submitData,
+    );
+    await appendLifecycleEventFromReceipt(
+      ctx,
+      config.LIFECYCLE_OUTPUT_DIR,
+      {
+        stage: "submitted",
+        taskId: task.taskId,
+        actor: ctx.gamma.address,
+      },
+      submitReceipt,
+    );
 
     state.markSubmitted(task.taskId, "gamma", traceHash, ipfsURI);
     console.log(`[gamma] submitted task=${task.taskId} corrupted=${corrupted}`);

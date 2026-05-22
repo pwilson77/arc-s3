@@ -1,5 +1,6 @@
 import { config } from "../config.js";
 import { executeCourthouseIntent, escrowAs, usdcAs } from "../contracts.js";
+import { appendLifecycleEventFromReceipt } from "../lifecycle.js";
 import type { AgentContext } from "../context.js";
 import type { TaskState } from "../state.js";
 import type { TaskAssignment } from "../types.js";
@@ -18,7 +19,10 @@ export async function runAlphaLoop(
     toggle = !toggle;
 
     // Approve the courthouse to spend USDC for the task payment
-    const approveTx = await usdc.approve(config.S3_ESCROW_COURTHOUSE, config.DEFAULT_TASK_PAYMENT);
+    const approveTx = await usdc.approve(
+      config.S3_ESCROW_COURTHOUSE,
+      config.DEFAULT_TASK_PAYMENT,
+    );
     await approveTx.wait();
     const data = escrow.interface.encodeFunctionData("forwardCreateTask", [
       ctx.alpha.address,
@@ -26,11 +30,7 @@ export async function runAlphaLoop(
       config.DEFAULT_TASK_PAYMENT,
       config.DEFAULT_BOND_AMOUNT,
     ]);
-    const receipt = await executeCourthouseIntent(
-      ctx,
-      "alpha",
-      data,
-    );
+    const receipt = await executeCourthouseIntent(ctx, "alpha", data);
 
     const createdLog = receipt.logs
       .map((log: unknown) => {
@@ -54,6 +54,16 @@ export async function runAlphaLoop(
       };
 
       state.enqueueForWorker(task);
+      await appendLifecycleEventFromReceipt(
+        ctx,
+        config.LIFECYCLE_OUTPUT_DIR,
+        {
+          stage: "created",
+          taskId: task.taskId,
+          actor: ctx.alpha.address,
+        },
+        receipt,
+      );
       console.log(`[alpha] created task=${task.taskId} worker=${workerLabel}`);
     }
 

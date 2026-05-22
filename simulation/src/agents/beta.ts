@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { config } from "../config.js";
 import { executeCourthouseIntent, escrowAs, usdcAs } from "../contracts.js";
+import { appendLifecycleEventFromReceipt } from "../lifecycle.js";
 import type { AgentContext } from "../context.js";
 import { writeTrace } from "../reasoningStore.js";
 import type { TaskState } from "../state.js";
@@ -25,11 +26,25 @@ export async function runBetaLoop(
       task.bondAmount,
     );
     await approveTx.wait();
-    const acceptData = escrow.interface.encodeFunctionData("forwardAcceptTask", [
-      ctx.beta.address,
-      task.taskId,
-    ]);
-    await executeCourthouseIntent(ctx, "beta", acceptData);
+    const acceptData = escrow.interface.encodeFunctionData(
+      "forwardAcceptTask",
+      [ctx.beta.address, task.taskId],
+    );
+    const acceptReceipt = await executeCourthouseIntent(
+      ctx,
+      "beta",
+      acceptData,
+    );
+    await appendLifecycleEventFromReceipt(
+      ctx,
+      config.LIFECYCLE_OUTPUT_DIR,
+      {
+        stage: "accepted",
+        taskId: task.taskId,
+        actor: ctx.beta.address,
+      },
+      acceptReceipt,
+    );
 
     const trace: ReasoningTrace = {
       taskId: task.taskId,
@@ -69,7 +84,21 @@ export async function runBetaLoop(
       "forwardSubmitTaskResult",
       [ctx.beta.address, task.taskId, traceHash, ipfsURI],
     );
-    await executeCourthouseIntent(ctx, "beta", submitData);
+    const submitReceipt = await executeCourthouseIntent(
+      ctx,
+      "beta",
+      submitData,
+    );
+    await appendLifecycleEventFromReceipt(
+      ctx,
+      config.LIFECYCLE_OUTPUT_DIR,
+      {
+        stage: "submitted",
+        taskId: task.taskId,
+        actor: ctx.beta.address,
+      },
+      submitReceipt,
+    );
 
     state.markSubmitted(task.taskId, "beta", traceHash, ipfsURI);
     console.log(`[beta] submitted task=${task.taskId} trace=${traceHash}`);

@@ -53,7 +53,9 @@ async function main(): Promise<void> {
   console.log(`S3_INTENT_FIREWALL=${await firewall.getAddress()}`);
   console.log(`S3_ESCROW_COURTHOUSE=${await courthouse.getAddress()}`);
   console.log(`S3_REPUTATION_REGISTRY=${await registry.getAddress()}`);
-  console.log(`S3_AGENT_IDENTITY_REGISTRY=${await identityRegistry.getAddress()}`);
+  console.log(
+    `S3_AGENT_IDENTITY_REGISTRY=${await identityRegistry.getAddress()}`,
+  );
 }
 
 main().catch((error) => {

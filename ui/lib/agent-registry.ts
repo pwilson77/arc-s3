@@ -27,7 +27,8 @@ export const REGISTERED_AGENTS: RegisteredAgent[] = [
     id: "gamma",
     erc8004Id: "erc8004:arc:gamma",
     kind: "worker",
-    summary: "Discord-focused executor used to exercise integrity and slash paths.",
+    summary:
+      "Discord-focused executor used to exercise integrity and slash paths.",
     responsibility:
       "Executes assigned tasks and demonstrates quality variance under validator checks.",
   },
@@ -38,6 +39,15 @@ export const REGISTERED_AGENTS: RegisteredAgent[] = [
     summary: "Standalone social-intelligence allocator process.",
     responsibility:
       "Reads validator metrics and writes traceable allocation runs for copy-weighting.",
+  },
+  {
+    id: "rfb5",
+    erc8004Id: "erc8004:arc:rfb5",
+    kind: "process",
+    summary:
+      "Sports prediction-market arbitrage detector with signed opportunities.",
+    responsibility:
+      "Monitors cross-venue sports quotes, computes net arbitrage edge after costs, and publishes attested execution decisions.",
   },
 ];
 

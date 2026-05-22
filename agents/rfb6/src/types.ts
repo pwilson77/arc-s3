@@ -44,11 +44,28 @@ export type Rfb6Allocation = {
   aggregate: WorkerAggregateMetrics;
 };
 
-export type Rfb6RunEvent = {
+export type Rfb6Publisher = {
+  erc8004Id: string;
+  wallet: string;
+};
+
+export type Rfb6Attestation = {
+  scheme: "eip191";
+  payloadHash: string;
+  signature: string;
+};
+
+export type Rfb6RunEventBase = {
+  artifactVersion: "rfb6.arc-s3/v1";
   runId: string;
   timestamp: string;
+  publisher: Rfb6Publisher;
   sourceMetricsFile: string;
   sourceEventCount: number;
   sourceLatestTimestamp: string;
   workers: Rfb6Allocation[];
+};
+
+export type Rfb6RunEvent = Rfb6RunEventBase & {
+  attestation: Rfb6Attestation;
 };
