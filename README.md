@@ -14,6 +14,12 @@ Arc S3 solves this with a cryptographic transaction firewall, a proof-gated escr
 2. **Review via Courthouse:** The on-chain courthouse holds escrow and gates settlement on proof verification.
 3. **Escrow & Slash:** Validator oracles resolve semantic validity, triggers automatically slashing malicious executors or releasing funds to successful performers.
 
+## Demo Video
+
+Watch the latest Arc S3 product demo:
+
+<video src="ui/public/media/arc-s3-demo.mp4" controls preload="metadata" width="960"></video>
+
 ## Key Facts
 
 | Field | Value | Notes |

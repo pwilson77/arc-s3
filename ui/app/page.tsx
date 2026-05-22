@@ -22,6 +22,19 @@ export default function Home() {
           notional guardrails.
         </p>
 
+        <div className="mb-12 border border-neutral-800 rounded-xl bg-neutral-950/60 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-accent font-mono mb-3">
+            product demo
+          </div>
+          <video
+            className="w-full rounded-lg border border-neutral-800"
+            controls
+            preload="metadata"
+            playsInline
+            src="/media/arc-s3-demo.mp4"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-12">
           <Pillar
             n="01"
