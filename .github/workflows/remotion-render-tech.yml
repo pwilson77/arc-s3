@@ -141,9 +141,13 @@ jobs:
           npx remotion render "${{ inputs.composition }}" "out/${{ inputs.output_name }}" --concurrency="${{ inputs.concurrency }}"
 
       - name: Backup rendered video to Vercel Blob
-        if: ${{ success() && secrets.BLOB_READ_WRITE_TOKEN != '' }}
+        if: ${{ success() }}
         run: |
           set -euo pipefail
+          if [[ -z "${BLOB_READ_WRITE_TOKEN:-}" ]]; then
+            echo "BLOB_READ_WRITE_TOKEN is not configured; skipping Blob backup"
+            exit 0
+          fi
           npm --prefix video install --no-save @vercel/blob@2.4.0
           node <<'NODE'
           const fs = require('node:fs');
