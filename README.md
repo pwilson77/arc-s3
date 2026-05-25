@@ -10,7 +10,13 @@ Arc S3 lets agents commit intent, execute work, and settle value with slashing-b
 - Demo video: [ui/public/media/arc-s3-demo.mp4](ui/public/media/arc-s3-demo.mp4)
 - Core contracts: [contracts/contracts](contracts/contracts)
 - Demo launcher: [scripts/demo.mjs](scripts/demo.mjs)
-- Grant docs: [.agents/docs](.agents/docs)
+- Project docs: [.agents/docs](.agents/docs)
+
+## Demo Preview
+
+<video controls muted playsinline preload="metadata" width="100%" src="https://github.com/pwilson77/arc-s3/raw/main/ui/public/media/arc-s3-demo.mp4">
+	Your browser does not support embedded video. Open the direct file at ui/public/media/arc-s3-demo.mp4.
+</video>
 
 ## Why This Matters
 
@@ -139,7 +145,7 @@ arc-s3/
 ├── simulation/                   # Validator/oracle and scenario data flows
 ├── scripts/                      # Demo, ops, employer, circle, health, pm2 config
 ├── ui/                           # Next.js operator UI
-└── .agents/                      # Local skills and grant/adoption docs
+└── .agents/                      # Local skills and project docs
 ```
 
 ## Developer Setup (Full Path)
@@ -205,6 +211,48 @@ Contribution priorities:
 - external agent SDK packaging and examples
 - reliability and performance hardening for long-running autopilot
 
+## Roadmap
+
+This roadmap captures the concrete improvements identified during build, demo, and ops review.
+
+### Near Term
+
+- Lifecycle consistency hardening
+	- make post-settlement index refresh fully automatic in all settlement paths
+	- reduce stale `pending` states by tightening lifecycle backfill and index update timing
+	- add clearer operator signaling when UI data is lifecycle-only vs trace-backed
+- Payment sizing controls and transparency
+	- expose effective payout clamps (`seed budget`, `max total commit`, bond split) directly in operator views
+	- add a preflight estimator so demo operators can see expected worker/publisher/validator payouts before publish
+	- improve docs around why wallet balance does not imply larger settlement amount
+- Autopilot reliability and observability
+	- add stronger stuck-task detection and recovery actions to autopilot supervision
+	- include lifecycle lag and settlement freshness checks in health endpoints
+	- continue hardening PM2-managed long-run operation (`autopilot:up`, health, logs)
+
+### Mid Term
+
+- Evidence UX upgrades
+	- add richer task detail pages that show trace integrity, settlement reasoning, and payout math in one place
+	- strengthen direct links between `/network`, `/traces`, and `/dashboard` for judge/operator workflows
+	- expand exportable forensic artifacts for reproducible review
+- Agent integration surface
+	- package shared agent libraries into a cleaner external-facing SDK layer
+	- publish more integration examples for third-party agent builders
+	- document recommended policy modules for common autonomous trading strategies
+
+### Quality of Life Improvements
+
+- One-command operator flows
+	- keep improving `demo:clean` and related scripts so setup, run, and verification remain predictable
+	- add safer defaults for common demo settings and environment checks
+- Better defaults and guardrails
+	- enforce sensible baseline demo budgets (for meaningful payouts) with explicit overrides
+	- improve environment validation and startup error messaging across workspaces
+- Documentation ergonomics
+	- maintain a clean root README with pointers to deeper docs
+	- keep contributor/security/runbook docs aligned with the actual command surface
+
 ## Security and Responsible Disclosure
 
 See [SECURITY.md](SECURITY.md) for the responsible disclosure process.
@@ -217,26 +265,6 @@ Open a private disclosure path with maintainers and include:
 - impact assessment
 - reproduction steps
 - suggested mitigation
-
-## Grant Roadmap and Use of Funds
-
-Planned milestones for OSS grant execution:
-
-1. SDK Packaging and Integrator Docs
-   - publish a clean external agent SDK wrapper
-   - add language-specific quickstarts and examples
-2. Verifiability and Observability
-   - improve UI evidence linking and lifecycle integrity checks
-   - add stronger benchmark and reliability reporting
-3. Ecosystem Adoption
-   - onboarding playbooks for third-party agent builders
-   - public integration demos and contributor growth loops
-
-Success metrics:
-
-- external agent integrations completed
-- reproducible end-to-end settlement demos
-- contributor throughput and issue resolution cadence
 
 ## License
 
