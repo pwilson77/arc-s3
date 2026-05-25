@@ -63,6 +63,7 @@ Implementation references:
 - Circle skill/setup scripts: [scripts/circle](scripts/circle)
 - Local skill packs: [.agents/skills](.agents/skills)
 - Shared on-chain publisher helpers: [agents/shared](agents/shared)
+- Trace schema spec: [.agents/docs/traces.md](.agents/docs/traces.md)
 
 Roadmap note: this repo currently exposes a practical SDK surface via scripts and shared libraries. Packaging a standalone public SDK module is a planned next step.
 
@@ -88,6 +89,8 @@ cp .env.example .env
 npm run demo:clean
 ```
 
+A pre-flight env validator ([scripts/validate-env.mjs](scripts/validate-env.mjs)) runs on every runtime entrypoint (demo launcher and agent launchers) and fails fast with a readable message if RPC URLs, contract addresses, or signer keys are missing — so you do not lose time chasing a downstream crash.
+
 4. Watch these UI routes while it runs.
 
 - `https://arc-s3-ui.vercel.app/network`
@@ -101,7 +104,32 @@ Expected milestones in logs and UI:
 - validator settles (released or slashed)
 - payout split and tx evidence become visible
 
+> **Note for evaluators — adversarial scenarios are intentional.** Roughly 15% of demo flows deliberately exercise the failure paths (firewall blocks, oracle rejects, bond slashes, dispute opens). Those red states in the UI are features, not bugs: they prove the accountability rails actually fire. A run with zero slashes or zero blocks would mean the firewall and courthouse are not being tested.
+
 ## Architecture and Trust Model
+
+### Hot Path vs Cold Path
+
+Arc S3 splits agent settlement into two distinct trust zones so latency-sensitive checks never block on slow verification:
+
+```text
+   HOT PATH (synchronous, on-chain, ms)        COLD PATH (asynchronous, off-chain + on-chain, sec–min)
+   ┌────────────────────────────────┐      ┌────────────────────────────────────────────┐
+   │  Intent Firewall (on-chain)    │      │  Validator / Escrow Courthouse (off + on-chain)  │
+   │  • policy preflight             │      │  • trace fetch + replay                          │
+   │  • bond + identity checks       │      │  • oracle attestation                            │
+   │  • task create gating           │      │  • release vs slash decision                     │
+   └────────────┬──────────────────┘      └───────────────────────────────┬──────────────────┘
+                │ reject → revert tx                          │ settle → release/slash + reputation
+                ▼                                              ▼
+           Task accepted                                   Funds + bond resolved
+```
+
+- **Hot path** runs inside a single transaction. It is deterministic, cheap to verify, and must complete in block time. Only checks that can be expressed as on-chain predicates live here.
+- **Cold path** consumes the trace artifact the worker submits after execution. It runs validator heuristics, fetches oracle attestations, and only then writes the release-or-slash outcome and reputation delta to chain.
+- The split lets us add expensive verification (trace replay, anomaly detection, cross-agent correlation) without making task creation slower or more expensive.
+
+### Sequence Overview
 
 ```mermaid
 flowchart LR

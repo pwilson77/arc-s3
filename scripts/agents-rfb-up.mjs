@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import { validateEnv } from "./validate-env.mjs";
+
+validateEnv();
 
 const RESET = "\x1b[0m";
 const RED = "\x1b[31m";
