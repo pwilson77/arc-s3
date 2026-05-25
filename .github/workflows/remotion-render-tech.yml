@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: projects/arc-s3/video/package-lock.json
+          cache-dependency-path: video/package-lock.json
 
       - name: Install dependencies
         working-directory: projects/arc-s3/video
