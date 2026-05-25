@@ -150,14 +150,16 @@ jobs:
           npx remotion render "${{ inputs.composition }}" "out/${{ inputs.output_name }}" --concurrency="${{ inputs.concurrency }}"
 
       - name: Backup rendered video to Vercel Blob
+        continue-on-error: true
         if: ${{ success() }}
+        working-directory: video
         run: |
           set -euo pipefail
           if [[ -z "${BLOB_READ_WRITE_TOKEN:-}" ]]; then
             echo "BLOB_READ_WRITE_TOKEN is not configured; skipping Blob backup"
             exit 0
           fi
-          npm --prefix video install --no-save @vercel/blob@2.4.0
+          npm install --no-save @vercel/blob@2.4.0
           node <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
@@ -166,7 +168,7 @@ jobs:
             const { put } = await import('@vercel/blob');
             const fileName = process.env.OUTPUT_NAME;
             const runId = process.env.GITHUB_RUN_ID;
-            const src = path.join(process.cwd(), 'video', 'out', fileName);
+            const src = path.join(process.cwd(), 'out', fileName);
             const body = fs.readFileSync(src);
             const blobPath = `arc-s3/renders/${runId}-${fileName}`;
             const res = await put(blobPath, body, {
