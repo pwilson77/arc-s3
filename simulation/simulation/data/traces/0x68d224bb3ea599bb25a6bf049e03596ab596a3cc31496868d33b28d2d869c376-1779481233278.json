@@ -1,0 +1,29 @@
+{
+  "taskId": "0x68d224bb3ea599bb25a6bf049e03596ab596a3cc31496868d33b28d2d869c376",
+  "worker": "0x6c527Cdc0C0F7276877C0555fDF9AB0E4E69D7E1",
+  "schemaVersion": "1.1.0",
+  "timestamp": "2026-05-22T20:20:33.278Z",
+  "decision": {
+    "marketType": "task-assignment",
+    "instrumentId": "0x68d224bb3ea599bb25a6bf049e03596ab596a3cc31496868d33b28d2d869c376",
+    "action": "execute",
+    "notionalUsd": 1,
+    "confidenceBps": 9700,
+    "timeHorizonSec": 300,
+    "expectedValueBps": -900,
+    "resolver": {
+      "kind": "validator",
+      "reference": "s3-validator-v1"
+    }
+  },
+  "plan": [],
+  "result": {
+    "success": false,
+    "outputHash": "0x5d83dd778152f67e7d457986826e8d505fab94620d7fc894cb8991cb0cfb42c6",
+    "details": "Injected malformed reasoning artifact"
+  },
+  "integrity": {
+    "malformed": true,
+    "corruptionReason": "intentional-schema-break"
+  }
+}

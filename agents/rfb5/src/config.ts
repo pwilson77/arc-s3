@@ -106,6 +106,14 @@ const envSchema = z.object({
         : ["1", "true", "yes"].includes(v.toLowerCase()),
     )
     .default(false),
+  RFB5_FORCE_SYNTHETIC_PROFITABLE: z
+    .union([z.boolean(), z.string()])
+    .transform((v) =>
+      typeof v === "boolean"
+        ? v
+        : ["1", "true", "yes"].includes(v.toLowerCase()),
+    )
+    .default(false),
   RFB5_ONCHAIN_DRY_RUN: z
     .union([z.boolean(), z.string()])
     .transform((v) =>
@@ -131,6 +139,24 @@ const envSchema = z.object({
   RFB5_ONCHAIN_OUTPUT_FILE: z
     .string()
     .default("./simulation/data/agents/rfb5-sports-arb-executor.jsonl"),
+  PINATA_JWT: z.string().optional(),
+  PINATA_NETWORK: z.enum(["public", "private"]).default("public"),
+  PINATA_UPLOAD_ENABLED: z
+    .union([z.boolean(), z.string()])
+    .transform((v) =>
+      typeof v === "boolean"
+        ? v
+        : ["1", "true", "yes"].includes(v.toLowerCase()),
+    )
+    .default(true),
+  RFB5_LOCAL_MIRROR: z
+    .union([z.boolean(), z.string()])
+    .transform((v) =>
+      typeof v === "boolean"
+        ? v
+        : ["1", "true", "yes"].includes(v.toLowerCase()),
+    )
+    .default(false),
   INTENT_DEFAULT_GAS_LIMIT: z.coerce.number().default(800_000),
   INTENT_DEFAULT_DEADLINE_SECONDS: z.coerce.number().default(600),
   INTENT_QUOTED_SLIPPAGE_BPS: z.coerce.number().min(0).max(10_000).default(50),

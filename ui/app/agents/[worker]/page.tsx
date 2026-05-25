@@ -3,10 +3,28 @@ import { notFound } from "next/navigation";
 import { readWorkerSnapshot } from "@/lib/metrics";
 import { isCopyEligible } from "@/lib/eligibility";
 import { getRegisteredAgent } from "@/lib/agent-registry";
+import { readLatestTracesByTaskId } from "@/lib/traces";
+import { readRfb5OnchainSummary } from "@/lib/rfb5-agent";
 import { PageHeader } from "../../_components/PageHeader";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 5;
+
+async function withTimeout<T>(
+  task: Promise<T>,
+  timeoutMs: number,
+  fallback: T,
+): Promise<T> {
+  const timeout = new Promise<T>((resolve) => {
+    setTimeout(() => resolve(fallback), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([task, timeout]);
+  } catch {
+    return fallback;
+  }
+}
 
 function Sparkline({ values }: { values: number[] }) {
   if (values.length < 2) return null;
@@ -54,6 +72,13 @@ export default async function AgentPage({
   }
 
   if (!snapshot && registered) {
+    const onchainTraces = await withTimeout(readLatestTracesByTaskId(), 8000, []);
+    const latestTrace = onchainTraces[onchainTraces.length - 1] ?? null;
+    const rfb5Summary =
+      registered.id === "rfb5"
+        ? await withTimeout(readRfb5OnchainSummary(), 8000, null)
+        : null;
+
     return (
       <div>
         <PageHeader
@@ -105,6 +130,44 @@ export default async function AgentPage({
               </span>
             )}
           </div>
+          {latestTrace ? (
+            <div className="mt-4 border border-neutral-800 rounded p-4 bg-neutral-950/40 text-xs">
+              <div className="text-[11px] text-neutral-500 uppercase tracking-wider font-mono mb-2">
+                onchain trace fallback
+              </div>
+              <div className="text-neutral-300 mb-1">
+                Live traces are available via chain/IPFS even though this worker-specific metrics stream is empty in the current runtime.
+              </div>
+              <div className="text-neutral-500 font-mono break-all mb-2">
+                latest task: {latestTrace.taskId}
+              </div>
+              <Link
+                href={`/traces/${encodeURIComponent(latestTrace.taskId)}`}
+                className="text-sm text-neutral-200 hover:underline"
+              >
+                open latest trace →
+              </Link>
+            </div>
+          ) : null}
+          {rfb5Summary ? (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+              <div className="border border-neutral-800 rounded p-3 bg-neutral-950/40 text-emerald-300">
+                submitted: {rfb5Summary.submitted}
+              </div>
+              <div className="border border-neutral-800 rounded p-3 bg-neutral-950/40 text-amber-300">
+                skipped: {rfb5Summary.skipped}
+              </div>
+              <div className="border border-neutral-800 rounded p-3 bg-neutral-950/40 text-rose-300">
+                errors: {rfb5Summary.errors}
+              </div>
+              <div className="md:col-span-3 text-neutral-500">
+                day: {rfb5Summary.day}
+                {rfb5Summary.lastObservedAt
+                  ? ` · last event ${new Date(rfb5Summary.lastObservedAt).toLocaleTimeString()}`
+                  : " · no events yet"}
+              </div>
+            </div>
+          ) : null}
           <div className="mt-4">
             {registered.id === "rfb6" ? (
               <Link

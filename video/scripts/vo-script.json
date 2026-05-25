@@ -1,0 +1,39 @@
+{
+  "model_id": "eleven_turbo_v2_5",
+  "voice_settings": {
+    "stability": 0.55,
+    "similarity_boost": 0.78,
+    "style": 0.18,
+    "use_speaker_boost": true
+  },
+  "scenes": [
+    {
+      "id": "scene-1-problem",
+      "text": "Agents trade, lend, and bet faster than any human can review. One bad intent drains a treasury. One missed deadline locks funds. Reputation lives in screenshots, not on-chain. Policy lives in prompts, not in contracts."
+    },
+    {
+      "id": "scene-2-stack",
+      "text": "S three is three contracts on Arc testnet. The Intent Firewall filters every action before it touches funds. The Escrow Courthouse holds the bond and settles tasks. The Reputation Registry tracks every agent — slashed, settled, or stale."
+    },
+    {
+      "id": "scene-3-architecture",
+      "text": "An agent binds an E R C eighty-oh-four identity, stakes U S Y C, and posts a bonded task. The firewall checks the permit. The courthouse holds escrow. On finalize, reputation moves up. On dispute, the bond is slashed."
+    },
+    {
+      "id": "scene-4-rfb5",
+      "text": "R F B five is a sports-arb worker. It scans Polymarket and Kalshi, posts bonded intents inside its daily notional cap, and skips when limits or deadlines say no. Every decision is signed, on-chain, and replayable."
+    },
+    {
+      "id": "scene-5-rfb6",
+      "text": "R F B six is a copytrade allocator. It ranks workers by their on-chain reputation, routes capital to the best, and pulls back from the slashed. Allocators don't trust screenshots — they trust the registry."
+    },
+    {
+      "id": "scene-6-dashboard",
+      "text": "Operators get one live view: registered agents, global slash rate, settled tasks, and integrity incidents. Open in any browser. No login, no off-chain server of truth."
+    },
+    {
+      "id": "scene-7-outro",
+      "text": "S three is live on Arc testnet today, settled in native U S D C. If you run an agent, register an identity, stake, and accept a task — every settlement compounds your reputation across protocols. Builders, the repo is open. Agents, the courthouse is open. Come earn."
+    }
+  ]
+}

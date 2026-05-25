@@ -7,7 +7,7 @@ import { config } from "./config.js";
 import { fetchLiveSnapshots } from "./live.js";
 import { executeRunOnChain } from "./onchain.js";
 import { scoreSnapshots } from "./scoring.js";
-import { appendRun, payloadHashForRun, signatureForRun } from "./store.js";
+import { appendRun as _legacyAppendRun, payloadHashForRun, persistRun, signatureForRun } from "./store.js";
 import type { EventMarketSnapshot, Rfb5Run, Rfb5RunBase } from "./types.js";
 
 process.on("uncaughtException", (err) => {
@@ -54,7 +54,21 @@ async function runOnce(
   }
 
   const latestTs = snapshots[snapshots.length - 1].timestampMs;
-  const decisions = scoreSnapshots(snapshots);
+  const rawDecisions = scoreSnapshots(snapshots);
+  const decisions =
+    config.RFB5_FORCE_SYNTHETIC_PROFITABLE && rawDecisions.length > 0
+      ? rawDecisions.map((d, i) =>
+          i === 0
+            ? {
+                ...d,
+                profitable: true,
+                netEdgeBps: Math.max(d.netEdgeBps, 50),
+                recommendedSizeUsd: Math.max(d.recommendedSizeUsd, 1),
+                reasons: [...d.reasons, "synthetic-force-profitable"],
+              }
+            : d,
+        )
+      : rawDecisions;
   const profitable = decisions.filter((d) => d.profitable);
   const totalSize = profitable.reduce(
     (acc, d) => acc + d.recommendedSizeUsd,
@@ -102,7 +116,20 @@ async function runOnce(
     },
   };
 
-  await appendRun(config.RFB5_AGENT_OUTPUT_FILE, run);
+  let ipfsURI: string | null = null;
+  try {
+    const persisted = await persistRun({
+      run,
+      pinataJwt: config.PINATA_JWT,
+      pinataNetwork: config.PINATA_NETWORK,
+      uploadEnabled: config.PINATA_UPLOAD_ENABLED,
+      localMirror: config.RFB5_LOCAL_MIRROR,
+      localFilePath: config.RFB5_AGENT_OUTPUT_FILE,
+    });
+    ipfsURI = persisted.ipfsURI;
+  } catch (err) {
+    console.error("[rfb5-agent:ipfs] persist failed", err);
+  }
 
   try {
     await executeRunOnChain(run);
@@ -111,7 +138,7 @@ async function runOnce(
   }
 
   console.log(
-    `[rfb5-agent] wrote run=${run.runId} detected=${run.summary.opportunitiesDetected} profitable=${run.summary.opportunitiesProfitable} avgNetEdgeBps=${run.summary.avgNetEdgeBps}`,
+    `[rfb5-agent] wrote run=${run.runId} detected=${run.summary.opportunitiesDetected} profitable=${run.summary.opportunitiesProfitable} avgNetEdgeBps=${run.summary.avgNetEdgeBps} ipfs=${ipfsURI ?? "-"}`,
   );
 
   return fingerprint;

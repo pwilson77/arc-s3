@@ -15,6 +15,7 @@ import {
 import {
   appendCopyTradeRun,
   assembleSignedCopyTradeRun,
+  persistCopyTradeRun,
   verifyCopyTradeRun,
 } from "./artifact.js";
 
@@ -179,7 +180,14 @@ async function run(): Promise<void> {
       "rfb6-copytrade.jsonl",
     );
 
-  await appendCopyTradeRun(outputFile, run);
+  await persistCopyTradeRun({
+    run,
+    pinataJwt: config.PINATA_JWT,
+    pinataNetwork: config.PINATA_NETWORK,
+    uploadEnabled: config.PINATA_UPLOAD_ENABLED,
+    localMirror: config.RFB6_LOCAL_MIRROR,
+    localFilePath: outputFile,
+  });
 
   const eligibleCount = allocations.filter((a) => a.weightBps > 0).length;
   const totalBps = allocations.reduce((acc, a) => acc + a.weightBps, 0);

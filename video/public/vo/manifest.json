@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-05-22T16:45:52.776Z",
+  "voiceId": "UgBBYS2sOqTuMpoF3BR0",
+  "modelId": "eleven_turbo_v2_5",
+  "scenes": [
+    {
+      "id": "scene-1-problem",
+      "file": "vo/scene-1-problem.mp3",
+      "bytes": 252073
+    },
+    {
+      "id": "scene-2-stack",
+      "file": "vo/scene-2-stack.mp3",
+      "bytes": 298884
+    },
+    {
+      "id": "scene-3-architecture",
+      "file": "vo/scene-3-architecture.mp3",
+      "bytes": 231593
+    },
+    {
+      "id": "scene-4-rfb5",
+      "file": "vo/scene-4-rfb5.mp3",
+      "bytes": 234937
+    },
+    {
+      "id": "scene-5-rfb6",
+      "file": "vo/scene-5-rfb6.mp3",
+      "bytes": 215711
+    },
+    {
+      "id": "scene-6-dashboard",
+      "file": "vo/scene-6-dashboard.mp3",
+      "bytes": 185199
+    },
+    {
+      "id": "scene-7-outro",
+      "file": "vo/scene-7-outro.mp3",
+      "bytes": 288435
+    }
+  ]
+}

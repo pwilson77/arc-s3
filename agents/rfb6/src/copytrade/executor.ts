@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import * as dotenv from "dotenv";
 import { z } from "zod";
 import { assertCirclePolicyOrThrow } from "../circle-policy.js";
+import { replaceLatestArtifact } from "../ipfs.js";
 import {
   Contract,
   Interface,
@@ -105,6 +106,24 @@ const envSchema = z.object({
     .min(0)
     .max(5_000)
     .default(2_000),
+  PINATA_JWT: z.string().optional(),
+  PINATA_NETWORK: z.enum(["public", "private"]).default("public"),
+  PINATA_UPLOAD_ENABLED: z
+    .union([z.boolean(), z.string()])
+    .transform((v) =>
+      typeof v === "boolean"
+        ? v
+        : ["1", "true", "yes"].includes(v.toLowerCase()),
+    )
+    .default(true),
+  RFB6_LOCAL_MIRROR: z
+    .union([z.boolean(), z.string()])
+    .transform((v) =>
+      typeof v === "boolean"
+        ? v
+        : ["1", "true", "yes"].includes(v.toLowerCase()),
+    )
+    .default(false),
 });
 
 const config = envSchema.parse(process.env);
@@ -316,8 +335,39 @@ async function writeState(state: ExecutorState): Promise<void> {
 }
 
 async function appendEvent(event: IntentEvent): Promise<void> {
-  await mkdir(dirname(OUTPUT), { recursive: true });
-  await appendFile(OUTPUT, `${JSON.stringify(event)}\n`, "utf8");
+  if (config.PINATA_UPLOAD_ENABLED) {
+    if (!config.PINATA_JWT) {
+      throw new Error(
+        "PINATA_JWT must be set when PINATA_UPLOAD_ENABLED=true (the default).",
+      );
+    }
+    try {
+      const retain = Number(process.env.PINATA_RETAIN ?? 50) || 50;
+      const indexFilePath = process.env.PINATA_INDEX_FILE || undefined;
+      await replaceLatestArtifact({
+        jwt: config.PINATA_JWT,
+        network: config.PINATA_NETWORK,
+        category: "rfb6-copytrade-executor-event",
+        identityKey: event.wallet,
+        runId: `${event.runId}-${event.wallet}-${event.observedAt}`,
+        payload: JSON.stringify(event),
+        keyvalues: {
+          runId: event.runId,
+          wallet: event.wallet,
+          action: event.action,
+          decision: event.firewall.decision,
+        },
+        retain,
+        indexFilePath,
+      });
+    } catch (err) {
+      console.error("[rfb6-copytrade-executor:ipfs] upload failed", err);
+    }
+  }
+  if (config.RFB6_LOCAL_MIRROR) {
+    await mkdir(dirname(OUTPUT), { recursive: true });
+    await appendFile(OUTPUT, `${JSON.stringify(event)}\n`, "utf8");
+  }
 }
 
 function notionalForWeight(weightBps: number): bigint {
@@ -325,6 +375,58 @@ function notionalForWeight(weightBps: number): bigint {
     (BigInt(weightBps) * config.RFB6_COPYTRADE_FOLLOWER_NOTIONAL_USDC6) /
     10_000n
   );
+}
+
+function notionalForWeightWithCap(weightBps: number, cap6: bigint): bigint {
+  return (BigInt(weightBps) * cap6) / 10_000n;
+}
+
+// Pick an effective per-position notional cap (micro-USDC) that fits current
+// follower (payment) and worker (bond) USDC balances, randomized within the
+// resulting headroom so successive runs vary in size instead of always paying
+// the same hardcoded amount. The env cap is the absolute upper bound.
+async function computeEffectiveNotionalCap6(args: {
+  provider: JsonRpcProvider;
+  followerAddr: string;
+  workerAddrs: string[];
+  intentCount: number;
+}): Promise<bigint> {
+  const envCap = config.RFB6_COPYTRADE_FOLLOWER_NOTIONAL_USDC6;
+  const intents = BigInt(Math.max(1, args.intentCount));
+  try {
+    const usdc = new Contract(config.USDC_ADDRESS, usdcAbi, args.provider);
+    const [followerBal, ...workerBals] = (await Promise.all([
+      usdc.balanceOf(args.followerAddr),
+      ...args.workerAddrs.map((a) => usdc.balanceOf(a)),
+    ])) as bigint[];
+
+    // Leave ~10% headroom; follower must cover total payment across intents.
+    const followerCap = (followerBal * 9n) / 10n / intents;
+
+    // Each worker covers bond = notional * bondBps / 10000 per intent.
+    const bondBps = BigInt(config.RFB6_COPYTRADE_BOND_BPS);
+    const workerCap = workerBals.length
+      ? workerBals
+          .map((bal) => (((bal * 9n) / 10n / intents) * 10_000n) / bondBps)
+          .reduce((a, b) => (a < b ? a : b))
+      : envCap;
+
+    let cap = envCap;
+    if (followerCap > 0n && followerCap < cap) cap = followerCap;
+    if (workerCap > 0n && workerCap < cap) cap = workerCap;
+
+    // Randomize within [50%, 100%] of the available cap.
+    const r = 0.5 + Math.random() * 0.5;
+    const scaled = (cap * BigInt(Math.floor(r * 1_000_000))) / 1_000_000n;
+    return scaled > 0n ? scaled : cap;
+  } catch (err) {
+    console.warn(
+      `[rfb6.copytrade.executor] balance probe failed, using env cap: ${
+        (err as Error).message
+      }`,
+    );
+    return envCap;
+  }
 }
 
 function firewallCheck(args: {
@@ -505,6 +607,29 @@ async function processRun(
   const heldKeys = new Set(Object.keys(state.positions));
   const events: IntentEvent[] = [];
 
+  const sizingProvider = new JsonRpcProvider(
+    config.ARC_RPC_URL,
+    config.ARC_CHAIN_ID,
+    { staticNetwork: true },
+  );
+  const eligibleIntentCount = run.wallets.filter(
+    (w) =>
+      w.eligible &&
+      !w.stopFollowing &&
+      w.weightBps >= config.RFB6_COPYTRADE_MIN_WEIGHT_BPS,
+  ).length;
+  const effectiveCap6 = await computeEffectiveNotionalCap6({
+    provider: sizingProvider,
+    followerAddr,
+    workerAddrs: [beta, gamma],
+    intentCount: eligibleIntentCount || 1,
+  });
+  console.log(
+    `[rfb6.copytrade.executor] effective notional cap = ${effectiveCap6} micro-USDC ($${(
+      Number(effectiveCap6) / 1_000_000
+    ).toFixed(4)}) over ${eligibleIntentCount} intents`,
+  );
+
   for (const key of heldKeys) {
     const target = incoming.get(key);
     if (
@@ -568,7 +693,7 @@ async function processRun(
     if (fromWeight === toWeight) continue;
 
     const fromNotional6 = current ? BigInt(current.notionalUsdc6) : 0n;
-    const toNotional6 = notionalForWeight(toWeight);
+    const toNotional6 = notionalForWeightWithCap(toWeight, effectiveCap6);
     const notionalDelta6 = toNotional6 - fromNotional6;
     const action: IntentEvent["action"] = fromWeight === 0 ? "open" : "resize";
     const worker = workerForWallet(key, beta, gamma);

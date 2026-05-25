@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { isAbsolute, resolve } from "node:path";
 import { getAddress, verifyMessage } from "ethers";
+import { loadArtifactsByCategory } from "./ipfs-store";
 
 import type { WorkerAggregateMetrics } from "./metrics";
 
@@ -118,20 +119,38 @@ function verifyRun(run: Rfb6RunEvent): {
 }
 
 export async function readRfb6RunAudit(limit = 50): Promise<Rfb6RunAudit[]> {
-  const path = runFilePath();
-  if (!existsSync(path)) return [];
-
-  const raw = await readFile(path, "utf8");
-  const lines = raw.split("\n").filter((line) => line.trim().length > 0);
   const parsed: Rfb6RunAudit[] = [];
 
-  for (const line of lines) {
-    try {
-      const run = JSON.parse(line) as Rfb6RunEvent;
+  // Primary path: IPFS via Pinata category listing.
+  try {
+    const ipfsRuns = await loadArtifactsByCategory<Rfb6RunEvent>(
+      "rfb6-run",
+      Math.max(limit, 50),
+    );
+    for (const entry of ipfsRuns) {
+      const run = entry.artifact;
       const verdict = verifyRun(run);
       parsed.push({ run, valid: verdict.valid, reason: verdict.reason });
-    } catch {
-      // Ignore malformed stream lines to preserve UI availability.
+    }
+  } catch (err) {
+    console.warn("[rfb6-agent] ipfs runs fetch failed", err);
+  }
+
+  // Fallback: local mirror file (only present when RFB6_LOCAL_MIRROR=true).
+  if (parsed.length === 0) {
+    const path = runFilePath();
+    if (existsSync(path)) {
+      const raw = await readFile(path, "utf8");
+      const lines = raw.split("\n").filter((line) => line.trim().length > 0);
+      for (const line of lines) {
+        try {
+          const run = JSON.parse(line) as Rfb6RunEvent;
+          const verdict = verifyRun(run);
+          parsed.push({ run, valid: verdict.valid, reason: verdict.reason });
+        } catch {
+          // Ignore malformed stream lines to preserve UI availability.
+        }
+      }
     }
   }
 

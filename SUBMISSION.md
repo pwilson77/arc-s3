@@ -73,8 +73,11 @@ Chain: Arc L1 (chainId `5042002`) · Gas + settlement asset: native USDC.
 cp .env.example .env       # fill Arc testnet addresses + keys
 npm install
 npm run build              # contracts + simulation + ui
-npm run sim                # autonomous loop against Arc testnet
-npm run ui                 # localhost:3030 — leaderboard + traces
+npm run demo:clean         # one fresh marketplace task + autopilot lifecycle against Arc testnet
 ```
+
+Live UI: [arc-s3-ui.vercel.app](https://arc-s3-ui.vercel.app) (`/dashboard`, `/network`, `/traces`).
+For longer soaks, supervise the lifecycle driver with `npm run autopilot:up` and probe it
+with `npm run autopilot:health`.
 
 See [DEMO.md](DEMO.md) for the 5-minute judge walkthrough.

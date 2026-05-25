@@ -1,4 +1,5 @@
 import { PageHeader } from "../../../_components/PageHeader";
+import Link from "next/link";
 import {
   readCopyTradeAudit,
   readExecutorEvents,
@@ -10,9 +11,26 @@ import {
 import { CopyTradeRunButton } from "./CopyTradeRunButton";
 import { AllocationTableClient } from "./AllocationTableClient";
 import { IntentStreamClient } from "./IntentStreamClient";
+import { readLatestTracesByTaskId } from "@/lib/traces";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 5;
+
+async function withTimeout<T>(
+  task: Promise<T>,
+  timeoutMs: number,
+  fallback: T,
+): Promise<T> {
+  const timeout = new Promise<T>((resolve) => {
+    setTimeout(() => resolve(fallback), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([task, timeout]);
+  } catch {
+    return fallback;
+  }
+}
 
 // Utility functions
 function shortAddr(addr: string): string {
@@ -34,19 +52,53 @@ function tradeAge(ts: number | null): string {
   return `${days}d`;
 }
 
-export default async function CopyTradePage() {
+export default async function CopyTradePage({
+  searchParams,
+}: {
+  searchParams?: { run?: string; wallet?: string };
+}) {
   const audited = await readCopyTradeAudit(20);
-  const latest = audited.filter((a) => a.valid).slice(-1)[0] ?? null;
+  const requestedRunId = searchParams?.run?.trim() ?? "";
+  const requestedWallet = searchParams?.wallet?.trim() ?? "";
+  const validAudits = audited.filter((a) => a.valid);
+  const selectedByRun = requestedRunId
+    ? validAudits.find((a) => a.run.runId === requestedRunId) ?? null
+    : null;
+  const latest = selectedByRun ?? validAudits.slice(-1)[0] ?? null;
   const events = await readExecutorEvents(200);
+  const fallbackTraces = await withTimeout(readLatestTracesByTaskId(), 8000, []);
+  const latestFallbackTrace =
+    fallbackTraces[fallbackTraces.length - 1] ?? null;
 
   if (!latest) {
     return (
-      <div className="text-neutral-400 text-sm">
-        no verified copytrade runs yet — run{" "}
-        <span className="font-mono">
-          npm run copytrade:rank -w @arc-s3/rfb6-agent
-        </span>
-        .
+      <div className="border border-neutral-800 rounded p-5 bg-neutral-900/30 text-sm text-neutral-400">
+        <div className="mb-2">
+          no verified copytrade runs yet — run{" "}
+          <span className="font-mono">
+            npm run copytrade:rank -w @arc-s3/rfb6-agent
+          </span>
+          .
+        </div>
+        {latestFallbackTrace ? (
+          <div className="mt-4 border border-neutral-800 rounded p-4 bg-neutral-950/40 text-xs">
+            <div className="text-[11px] text-neutral-500 uppercase tracking-wider font-mono mb-2">
+              onchain trace fallback
+            </div>
+            <div className="text-neutral-300 mb-1">
+              Chain/IPFS traces are live. This page is waiting on local copytrade artifacts, but live trace retrieval is available now.
+            </div>
+            <div className="text-neutral-500 font-mono break-all mb-2">
+              latest task: {latestFallbackTrace.taskId}
+            </div>
+            <Link
+              href={`/traces/${encodeURIComponent(latestFallbackTrace.taskId)}`}
+              className="text-neutral-200 hover:underline"
+            >
+              open latest trace →
+            </Link>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -136,7 +188,20 @@ export default async function CopyTradePage() {
         <h2 className="text-[11px] text-neutral-500 mb-4 uppercase tracking-wider font-mono">
           allocation snapshot
         </h2>
-        <AllocationTableClient wallets={wallets} />
+        {(requestedRunId || requestedWallet) && (
+          <div className="mb-3 text-xs text-neutral-400 font-mono border border-neutral-800 rounded p-2 bg-neutral-900/30">
+            linked evidence context:
+            {requestedRunId ? ` run=${requestedRunId}` : ""}
+            {requestedWallet ? ` wallet=${requestedWallet}` : ""}
+            {requestedRunId && requestedRunId !== run.runId
+              ? ` (showing run=${run.runId})`
+              : ""}
+          </div>
+        )}
+        <AllocationTableClient
+          wallets={wallets}
+          initialWalletQuery={requestedWallet}
+        />
       </section>
 
       <section className="mb-12">

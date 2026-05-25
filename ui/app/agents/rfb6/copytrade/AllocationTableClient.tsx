@@ -61,8 +61,10 @@ function statusChip(w: CopyTradeWalletEntry) {
 
 export function AllocationTableClient({
   wallets,
+  initialWalletQuery = "",
 }: {
   wallets: WalletWithPositions[];
+  initialWalletQuery?: string;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<
@@ -72,6 +74,7 @@ export function AllocationTableClient({
   const [roiMax, setRoiMax] = useState<number | null>(null);
   const [winMin, setWinMin] = useState<number | null>(null);
   const [activeMax, setActiveMax] = useState<number | null>(null);
+  const [walletQuery, setWalletQuery] = useState<string>(initialWalletQuery);
   const [expandedWallets, setExpandedWallets] = useState<
     Record<string, boolean>
   >({});
@@ -87,7 +90,13 @@ export function AllocationTableClient({
 
   // Apply filters
   const filtered = useMemo(() => {
+    const q = walletQuery.trim().toLowerCase();
     return wallets.filter((w) => {
+      if (q) {
+        const hay = `${w.wallet} ${w.userName ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+
       // Status filter
       if (statusFilter === "eligible" && (!w.eligible || w.stopFollowing))
         return false;
@@ -107,7 +116,7 @@ export function AllocationTableClient({
 
       return true;
     });
-  }, [statusFilter, roiMin, roiMax, winMin, activeMax, wallets]);
+  }, [walletQuery, statusFilter, roiMin, roiMax, winMin, activeMax, wallets]);
 
   // Pagination
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -121,7 +130,22 @@ export function AllocationTableClient({
         <h3 className="text-xs font-mono text-neutral-500 uppercase">
           Filters
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div>
+            <label className="text-xs text-neutral-400 block mb-1">
+              Wallet / User
+            </label>
+            <input
+              type="text"
+              placeholder="0x..., username"
+              value={walletQuery}
+              onChange={(e) => {
+                setWalletQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-xs text-neutral-100"
+            />
+          </div>
           <div>
             <label className="text-xs text-neutral-400 block mb-1">
               Status

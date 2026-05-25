@@ -20,6 +20,34 @@ function traceFileNameFromIpfs(ipfsURI: string): string {
   return ipfsURI.replace("ipfs://local-sim/", "");
 }
 
+function ipfsGatewayUrl(ipfsURI: string): string {
+  const base = config.IPFS_GATEWAY_BASE_URL.replace(/\/+$/, "");
+  const cidOrPath = ipfsURI.replace(/^ipfs:\/\//, "").replace(/^\/+/, "");
+  return `${base}/${cidOrPath}`;
+}
+
+async function readTracePayload(ipfsURI: string): Promise<string> {
+  if (ipfsURI.startsWith("ipfs://local-sim/")) {
+    const tracePath = join(
+      config.TRACE_OUTPUT_DIR,
+      traceFileNameFromIpfs(ipfsURI),
+    );
+    return readFile(tracePath, "utf8");
+  }
+
+  if (ipfsURI.startsWith("ipfs://")) {
+    const response = await fetch(ipfsGatewayUrl(ipfsURI));
+    if (!response.ok) {
+      throw new Error(
+        `failed to fetch trace from gateway (${response.status})`,
+      );
+    }
+    return response.text();
+  }
+
+  throw new Error(`unsupported trace URI: ${ipfsURI}`);
+}
+
 function expectedWorkerAddress(
   workerLabel: string,
   ctx: AgentContext,
@@ -42,11 +70,7 @@ export async function runValidatorLoop(
     const pending = state.pending();
     for (const item of pending) {
       try {
-        const tracePath = join(
-          config.TRACE_OUTPUT_DIR,
-          traceFileNameFromIpfs(item.ipfsURI),
-        );
-        const raw = await readFile(tracePath, "utf8");
+        const raw = await readTracePayload(item.ipfsURI);
         const trace = JSON.parse(raw) as ReasoningTrace;
         const expectedWorker = expectedWorkerAddress(item.worker, ctx);
         const computedHash = `0x${createHash("sha256")

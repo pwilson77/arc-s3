@@ -1,8 +1,42 @@
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { replaceLatestArtifact } from "@arc-s3/agent-shared/ipfs";
 import { config } from "./config.js";
 import type { ReasoningTrace } from "./types.js";
+
+const REASONING_TRACE_CATEGORY = "reasoning-trace";
+const DEFAULT_RETAIN = 10;
+
+async function uploadTraceToPinata(
+  trace: ReasoningTrace,
+  payload: string,
+): Promise<string> {
+  if (!config.PINATA_JWT) {
+    throw new Error("PINATA_JWT is required when PINATA_UPLOAD_ENABLED=true");
+  }
+
+  const retain =
+    Number(process.env.PINATA_RETAIN ?? DEFAULT_RETAIN) || DEFAULT_RETAIN;
+  const indexFilePath = process.env.PINATA_INDEX_FILE || undefined;
+
+  const uploaded = await replaceLatestArtifact({
+    jwt: config.PINATA_JWT,
+    network: config.PINATA_NETWORK,
+    category: REASONING_TRACE_CATEGORY,
+    identityKey: trace.taskId,
+    runId: `${trace.taskId}-${Date.now()}`,
+    payload,
+    keyvalues: {
+      worker: trace.worker,
+      schemaVersion: String(trace.schemaVersion),
+    },
+    retain,
+    indexFilePath,
+  });
+
+  return uploaded.ipfsURI;
+}
 
 export async function writeTrace(
   trace: ReasoningTrace,
@@ -15,6 +49,22 @@ export async function writeTrace(
   const filePath = join(config.TRACE_OUTPUT_DIR, fileName);
 
   await writeFile(filePath, payload, "utf8");
+
+  if (config.PINATA_UPLOAD_ENABLED) {
+    try {
+      const ipfsURI = await uploadTraceToPinata(trace, payload);
+      return { ipfsURI, traceHash };
+    } catch (error) {
+      if (config.PINATA_UPLOAD_STRICT) {
+        throw error;
+      }
+      console.warn(
+        `[trace-store] pinata upload failed, using local fallback: ${String(
+          error,
+        )}`,
+      );
+    }
+  }
 
   return {
     ipfsURI: `ipfs://local-sim/${fileName}`,

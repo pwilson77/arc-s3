@@ -1,0 +1,24 @@
+{
+  "name": "@arc-s3/agent-shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./onchain-publisher": "./src/onchain-publisher.ts",
+    "./ipfs": "./src/ipfs.ts",
+    "./employer-request": "./src/employer-request.ts"
+  },
+  "scripts": {
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.7.3"
+  }
+}

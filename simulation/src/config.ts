@@ -23,6 +23,14 @@ const envSchema = z.object({
   INTENT_DEFAULT_DEADLINE_SECONDS: z.coerce.number().default(120),
   INTENT_QUOTED_SLIPPAGE_BPS: z.coerce.number().min(0).max(10_000).default(50),
   GAMMA_CORRUPTION_BPS: z.coerce.number().min(0).max(10_000).default(1_500),
+  PINATA_JWT: z.string().optional(),
+  PINATA_NETWORK: z.enum(["public", "private"]).default("public"),
+  PINATA_UPLOAD_ENABLED: z.coerce.boolean().default(false),
+  PINATA_UPLOAD_STRICT: z.coerce.boolean().default(false),
+  IPFS_GATEWAY_BASE_URL: z
+    .string()
+    .url()
+    .default("https://gateway.pinata.cloud/ipfs"),
   TRACE_OUTPUT_DIR: z.string().default("./simulation/data/traces"),
   METRICS_OUTPUT_DIR: z.string().default("./simulation/data/metrics"),
   LIFECYCLE_OUTPUT_DIR: z.string().default("./simulation/data/lifecycle"),

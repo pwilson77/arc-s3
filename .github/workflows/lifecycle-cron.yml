@@ -1,0 +1,49 @@
+name: lifecycle-indexer-cron
+
+# Pings the UI's /api/lifecycle/index endpoint so it scans new chain events
+# and persists them to Vercel Blob. Free GitHub Actions cron has a 5 min
+# minimum granularity; if events sit just under 5 min behind, the UI's
+# tail-fill RPC scan covers the gap.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: lifecycle-indexer-cron
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: ping indexer
+        env:
+          UI_BASE_URL: ${{ secrets.UI_BASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${UI_BASE_URL:-}" ] || [ -z "${CRON_SECRET:-}" ]; then
+            echo "UI_BASE_URL or CRON_SECRET secret missing"
+            exit 1
+          fi
+          # Drain up to 3 ticks in a row so a backlog catches up faster.
+          for i in 1 2 3; do
+            echo "tick $i"
+            response=$(curl -sS -o /tmp/body -w '%{http_code}' \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              "${UI_BASE_URL%/}/api/lifecycle/index")
+            cat /tmp/body
+            echo
+            if [ "$response" != "200" ]; then
+              echo "non-200 status: $response"
+              exit 1
+            fi
+            if grep -q '"done":true' /tmp/body; then
+              echo "indexer is caught up"
+              break
+            fi
+            sleep 5
+          done

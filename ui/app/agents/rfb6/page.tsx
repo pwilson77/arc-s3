@@ -7,7 +7,11 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 5;
 
-export default async function Rfb6AgentPage() {
+export default async function Rfb6AgentPage({
+  searchParams,
+}: {
+  searchParams?: { run?: string; worker?: string };
+}) {
   const audited = await readRfb6RunAudit(40);
   const summary = await readRfb6VerificationSummary(200);
   const verifiedRuns = audited
@@ -15,6 +19,8 @@ export default async function Rfb6AgentPage() {
     .map((entry) => entry.run);
   const latest = verifiedRuns[verifiedRuns.length - 1] ?? null;
   const recent = [...audited].reverse().slice(0, 20);
+  const requestedRunId = searchParams?.run?.trim() ?? "";
+  const workerFilter = searchParams?.worker?.trim().toLowerCase() ?? "";
 
   if (!latest) {
     return (
@@ -24,6 +30,10 @@ export default async function Rfb6AgentPage() {
       </div>
     );
   }
+
+  const visibleWorkers = workerFilter
+    ? latest.workers.filter((w) => w.worker.toLowerCase().includes(workerFilter))
+    : latest.workers;
 
   return (
     <div>
@@ -50,6 +60,16 @@ export default async function Rfb6AgentPage() {
         <h2 className="text-[11px] text-neutral-500 mb-4 uppercase tracking-wider font-mono">
           latest allocation snapshot
         </h2>
+        {(requestedRunId || workerFilter) && (
+          <div className="mb-3 text-xs text-neutral-400 font-mono border border-neutral-800 rounded p-2 bg-neutral-900/30">
+            linked evidence context:
+            {requestedRunId ? ` run=${requestedRunId}` : ""}
+            {workerFilter ? ` worker=${workerFilter}` : ""}
+            {requestedRunId && requestedRunId !== latest.runId
+              ? ` (showing latest run=${latest.runId})`
+              : ""}
+          </div>
+        )}
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-[11px] text-neutral-500 uppercase tracking-wider font-mono border-b border-neutral-800">
@@ -62,7 +82,7 @@ export default async function Rfb6AgentPage() {
             </tr>
           </thead>
           <tbody>
-            {latest.workers.map((w) => (
+            {visibleWorkers.map((w) => (
               <tr
                 key={`${latest.runId}-${w.worker}`}
                 className="border-b border-neutral-900"
@@ -87,6 +107,13 @@ export default async function Rfb6AgentPage() {
                 </td>
               </tr>
             ))}
+            {visibleWorkers.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-neutral-500 text-xs">
+                  no workers match the linked evidence filter.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </section>

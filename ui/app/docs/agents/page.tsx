@@ -201,6 +201,48 @@ export default function AgentDocsPage() {
         </div>
       </Section>
 
+      <Section title="Marketplace and Autopilot">
+        <div className="text-sm text-neutral-300 space-y-2">
+          <p>
+            Employer requests are signed off-chain, pinned to IPFS via Pinata,
+            and paired by the matcher with the latest rfb5 / rfb6 candidate
+            decisions. The matcher then calls{" "}
+            <span className="font-mono text-neutral-100">
+              S3IntentFirewall.forwardCreateTaskV2
+            </span>{" "}
+            to publish each task on Arc.
+          </p>
+          <p>
+            The rfb6 lifecycle autopilot drives accept → submit → settle for
+            every published task, preflighting wallet native balance and USDC vs
+            bond before each tx and parking under-funded tasks in a persistent
+            pending set with a stuck-task grace window.
+          </p>
+          <p>
+            A health snapshot is written each tick to{" "}
+            <span className="font-mono text-neutral-100">
+              simulation/data/agents/rfb6-copytrade-autopilot-health.json
+            </span>{" "}
+            and exposed via{" "}
+            <span className="font-mono text-neutral-100">
+              npm run autopilot:health
+            </span>{" "}
+            (exit codes: 2 no snapshot, 3 stale, 4 stuck tasks). pm2 supervision
+            is wired through{" "}
+            <span className="font-mono text-neutral-100">
+              scripts/ecosystem.config.cjs
+            </span>
+            .
+          </p>
+          <p>
+            The end-to-end pipeline runs from one entrypoint:{" "}
+            <span className="font-mono text-neutral-100">npm run demo</span> (or{" "}
+            <span className="font-mono text-neutral-100">demo:clean</span> to
+            wipe state first).
+          </p>
+        </div>
+      </Section>
+
       <Section title="RFB5 On-Chain Guardrails (Testnet)">
         <div className="text-sm text-neutral-300 space-y-2">
           <p>

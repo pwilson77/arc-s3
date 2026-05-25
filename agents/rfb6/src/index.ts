@@ -3,8 +3,9 @@ import { Wallet } from "ethers";
 import { assertCirclePolicyOrThrow } from "./circle-policy.js";
 import { config } from "./config.js";
 import { buildWorkerSnapshots, readAllEvents } from "./metrics.js";
+import { executeRunOnChain } from "./onchain.js";
 import { buildAllocations } from "./scoring.js";
-import { appendRun, payloadHashForRun, signatureForRun } from "./store.js";
+import { payloadHashForRun, persistRun, signatureForRun } from "./store.js";
 import type { Rfb6RunEvent, Rfb6RunEventBase } from "./types.js";
 
 async function runOnce(
@@ -54,7 +55,20 @@ async function runOnce(
     },
   };
 
-  await appendRun(config.RFB6_AGENT_OUTPUT_FILE, run);
+  await persistRun({
+    run,
+    pinataJwt: config.PINATA_JWT,
+    pinataNetwork: config.PINATA_NETWORK,
+    uploadEnabled: config.PINATA_UPLOAD_ENABLED,
+    localMirror: config.RFB6_LOCAL_MIRROR,
+    localFilePath: config.RFB6_AGENT_OUTPUT_FILE,
+  });
+
+  try {
+    await executeRunOnChain(run);
+  } catch (err) {
+    console.error("[rfb6-agent:onchain] execution failed", err);
+  }
 
   const winners = allocations
     .filter((w) => w.weightBps > 0)

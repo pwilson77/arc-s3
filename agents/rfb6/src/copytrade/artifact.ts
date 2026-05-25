@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Wallet, getAddress, verifyMessage } from "ethers";
+import { replaceLatestArtifact } from "../ipfs.js";
 import type { AllocationResult } from "./allocate.js";
 import type { DegradationVerdict } from "./degradation.js";
 import type { WalletScorecard } from "./wallet-metrics.js";
@@ -187,4 +188,60 @@ export async function appendCopyTradeRun(
 ): Promise<void> {
   await mkdir(dirname(filePath), { recursive: true });
   await appendFile(filePath, `${JSON.stringify(run)}\n`, "utf8");
+}
+
+export type PersistCopyTradeArgs = {
+  run: CopyTradeRun;
+  pinataJwt?: string;
+  pinataNetwork: "public" | "private";
+  uploadEnabled: boolean;
+  localMirror: boolean;
+  localFilePath: string;
+};
+
+export type PersistCopyTradeResult = {
+  cid: string | null;
+  ipfsURI: string | null;
+  mirroredLocally: boolean;
+};
+
+export async function persistCopyTradeRun(
+  args: PersistCopyTradeArgs,
+): Promise<PersistCopyTradeResult> {
+  let cid: string | null = null;
+  let ipfsURI: string | null = null;
+
+  if (args.uploadEnabled) {
+    if (!args.pinataJwt) {
+      throw new Error(
+        "PINATA_JWT must be set when PINATA_UPLOAD_ENABLED=true (the default).",
+      );
+    }
+    const retain = Number(process.env.PINATA_RETAIN ?? 10) || 10;
+    const indexFilePath = process.env.PINATA_INDEX_FILE || undefined;
+    const uploaded = await replaceLatestArtifact({
+      jwt: args.pinataJwt,
+      network: args.pinataNetwork,
+      category: "rfb6-copytrade-run",
+      identityKey: args.run.publisher.id,
+      runId: args.run.runId,
+      payload: JSON.stringify(args.run),
+      keyvalues: {
+        publisher: args.run.publisher.id,
+        wallets: String(args.run.wallets.length),
+      },
+      retain,
+      indexFilePath,
+    });
+    cid = uploaded.cid;
+    ipfsURI = uploaded.ipfsURI;
+  }
+
+  let mirroredLocally = false;
+  if (args.localMirror) {
+    await appendCopyTradeRun(args.localFilePath, args.run);
+    mirroredLocally = true;
+  }
+
+  return { cid, ipfsURI, mirroredLocally };
 }

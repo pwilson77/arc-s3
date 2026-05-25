@@ -1,83 +1,101 @@
 # Arc S3
 
-> Secure transact-and-settle rails for fully autonomous AI agents on the Arc L1 network.
+Secure transact-and-settle rails for autonomous AI agents on Arc L1.
 
-## Problem
+Arc S3 lets agents commit intent, execute work, and settle value with slashing-backed accountability instead of social trust.
 
-When AI agents transact with other agents or external services, they face a double-trust problem. There is no decentralized way to verify that an executing agent's actions match its semantic reasoning or declared parameters before releasing funds. Standard blockchain transactions only check signature and balance validity—they cannot evaluate intent, assess semantic correctness, or verify task checkpoints off-chain.
+## Quick Links
 
-## Solution
+- Live UI: https://arc-s3-ui.vercel.app
+- Demo video: [ui/public/media/arc-s3-demo.mp4](ui/public/media/arc-s3-demo.mp4)
+- Core contracts: [contracts/contracts](contracts/contracts)
+- Demo launcher: [scripts/demo.mjs](scripts/demo.mjs)
+- Grant docs: [.agents/docs](.agents/docs)
 
-Arc S3 solves this with a cryptographic transaction firewall, a proof-gated escrow courthouse, reputation gating, and ERC-8004 identity matching on Arc L1. 
+## Why This Matters
 
-1. **Gate by Intent:** Workers submit signed reasoning traces alongside transactions.
-2. **Review via Courthouse:** The on-chain courthouse holds escrow and gates settlement on proof verification.
-3. **Escrow & Slash:** Validator oracles resolve semantic validity, triggers automatically slashing malicious executors or releasing funds to successful performers.
+Autonomous agents can move money faster than humans can review intent. Existing rails verify signatures and balances, but do not verify whether an agent's execution matched its declared reasoning.
 
-## Demo Video
+Arc S3 adds programmable accountability:
 
-Watch the latest Arc S3 product demo:
+- Intent Firewall gates task creation and policy checks before execution.
+- Escrow Courthouse holds payment and bond, then releases or slashes after validation.
+- Reputation Registry records outcomes so future allocation can react to real performance.
+- ERC-8004 identity mapping links agent identities to wallets for deterministic attribution.
 
-<video src="ui/public/media/arc-s3-demo.mp4" controls preload="metadata" width="960"></video>
+## What Is Live Today
 
-## Key Facts
+Arc S3 is already operating on Arc testnet with deployable contracts, running agents, and an observable lifecycle UI.
 
-| Field | Value | Notes |
-| --- | --- | --- |
-| **Escrow Courthouse** | `0xEa6e731914ED7a7435018FdB647D744302c1f27D` | Settle task, dispute resolution, escrow |
-| **Intent Firewall** | `0xfa8b8429fa0c8814c404603A006A3E120EA45A18` | Task creation gating & preflight checks |
-| **Reputation Registry** | `0xb703cDDeE0b2419A9cc0f86324178AD422958c0f` | Slashing accounting and agent rating |
-| **Agent Identity Registry** | `0x092C3014EAEd52EfC6272499b48e3902646BD6eb` | ERC-8004 decentralized mapping |
-| **Default Stablecoin** | USDC (`0x3600000000000000000kb` fallback) | Task funding and bond denomination |
+| Field                   | Value                                        | Notes                                     |
+| ----------------------- | -------------------------------------------- | ----------------------------------------- |
+| Escrow Courthouse       | `0xEa6e731914ED7a7435018FdB647D744302c1f27D` | Escrow + release/slash settlement         |
+| Intent Firewall         | `0xfa8b8429fa0c8814c404603A006A3E120EA45A18` | Task creation gating and policy preflight |
+| Reputation Registry     | `0xb703cDDeE0b2419A9cc0f86324178AD422958c0f` | Slash/settlement accounting               |
+| Agent Identity Registry | `0x092C3014EAEd52EfC6272499b48e3902646BD6eb` | ERC-8004 identity to wallet mapping       |
+| Settlement Asset        | Native USDC on Arc L1                        | Payment and bond denomination             |
 
-## How It Differs
+Evidence surfaces in the UI:
 
-| Feature | Traditional Firewalls | Arc S3 Firewall Architecture |
-| --- | --- | --- |
-| **Target Layer** | Packet/address level | Semantic intent & transaction logic |
-| **Validation** | Static rules & blacklists | Dynamic reasoning trace verification |
-| **Trust Model** | Centralized or client-side | Decoupled validator oracles & on-chain escrow |
-| **Settlement** | Immediate or manual | Automated proof-gated release/slash courthouse |
-| **Identity** | IP / Address-bound | ERC-8004 cryptographic agent registry |
+- `/network`: lifecycle stages (created/accepted/submitted/validated), release/slash state, tx links, payout details
+- `/traces`: structured reasoning artifacts by task
+- `/dashboard`: aggregate settled/slashed metrics and registered agent roster
 
----
+## Agent Skills and SDK Surface
 
-## Project Structure
+Yes, external agents can participate today through a skills-first integration surface, with SDK-style scripts and commands in this repo.
 
-This project is structured as a monorepo containing contracts, autonomous agents, an offline/online simulation playground, and a Next.js network browser:
+Current participation interfaces:
 
+- Agent skills bootstrap: `npm run circle:setup`
+- Wallet/session checks: `npm run circle:status` and `npm run circle:fund`
+- Service discovery/payment: `npm run circle:services:search` and `npm run circle:services:pay`
+- Identity sync into Arc ERC-8004 registry: `npm run circle:sync:identity`
+
+Implementation references:
+
+- Circle skill/setup scripts: [scripts/circle](scripts/circle)
+- Local skill packs: [.agents/skills](.agents/skills)
+- Shared on-chain publisher helpers: [agents/shared](agents/shared)
+
+Roadmap note: this repo currently exposes a practical SDK surface via scripts and shared libraries. Packaging a standalone public SDK module is a planned next step.
+
+## 5-Minute Reviewer Quickstart
+
+Use this path for evaluators who want to verify end-to-end behavior quickly.
+
+1. Install dependencies.
+
+```bash
+npm install
 ```
-arc-s3/
-├── contracts/                        # Solidity program contracts for Arc L1
-│   └── contracts/
-│       ├── S3EscrowCourthouse.sol    # Proof-gated escrows with release/slash logic
-│       ├── S3IntentFirewall.sol      # Transaction proxy validating reasoning hashes
-│       ├── S3ReputationRegistry.sol  # Record-keeper tracking performance and penalties
-│       └── S3AgentIdentityRegistry.sol # ERC-8004 agent-wallet address mapper
-├── agents/                           # Plug-and-play autonomous trading agents
-│   ├── rfb5/                         # Sports-arb execution agent (with forward V2 support)
-│   └── rfb6/                         # Leaderboard scraper & copytrade execution agent
-├── simulation/                       # Scenario triggers, validator oracle, and trace stores
-│   ├── src/agents/                   # Mock worker nodes (Alpha, Beta, Gamma)
-│   └── src/scenarios/                # Negative-path & dry-run test cases
-├── scripts/                          # Bootstrap deployment, sync and onboarding tasks
-│   └── circle/                       # Circle agent-wallet skills management
-└── ui/                               # Next.js operator browser & tracing timeline
+
+2. Configure environment values.
+
+```bash
+cp .env.example .env
 ```
 
----
+3. Run one-command demo.
 
-## Architecture
+```bash
+npm run demo:clean
+```
 
-### Container View
+4. Watch these UI routes while it runs.
 
-- Worker agents submit signed reasoning traces to the simulation and settlement engine.
-- The validator oracle resolves validity for submitted traces.
-- Settlements execute on Arc L1 with release/slash outcomes.
-- Metrics store persists traces, lifecycle checkpoints, and settlement telemetry.
-- The Next.js UI consumes telemetry for lifecycle visibility and task drill-down.
+- `https://arc-s3-ui.vercel.app/network`
+- `https://arc-s3-ui.vercel.app/traces`
+- `https://arc-s3-ui.vercel.app/dashboard`
 
-### Operational Lifecycle Flow
+Expected milestones in logs and UI:
+
+- matcher publishes a task on-chain
+- worker accepts and submits
+- validator settles (released or slashed)
+- payout split and tx evidence become visible
+
+## Architecture and Trust Model
 
 ```mermaid
 flowchart LR
@@ -89,7 +107,6 @@ flowchart LR
 	ui[Network Lifecycle UI]
 	table[Settlement Stream Table]
 	modal[Task Details Modal]
-	follower[Follower]
 
 	worker -->|Submit signed trace| sim
 	oracle -->|Resolve validity| sim
@@ -105,121 +122,122 @@ flowchart LR
 	ui -->|Read traces + lifecycle + settlement telemetry| metrics
 	ui --> table
 	table -->|Open details| modal
-	follower -->|Inspect and decide copy| ui
 ```
 
-### Flow Key
+Trust boundaries:
 
-- stage nodes: created, accepted, submitted, validated represent on-chain lifecycle checkpoints.
-- valid -> release: validator accepted the trace and settlement releases funds.
-- invalid -> slash: validator rejected the trace and settlement applies slashing.
-- table -> modal: operator opens task drill-down from settlement stream rows.
+- On-chain guarantees: escrow state transitions, payout/slash outcome, lifecycle events
+- Off-chain inputs: traces, market data, and validator oracle decisions
+- Mitigations: bond slashing, explicit reasons, replayable artifacts, and per-task evidence links
 
----
+## Repo Map
 
-## Arc Testnet Setup
+```text
+arc-s3/
+├── contracts/                    # Solidity contracts and deployment scripts
+├── agents/                       # Worker/process agents (rfb5, rfb6, shared libs)
+├── simulation/                   # Validator/oracle and scenario data flows
+├── scripts/                      # Demo, ops, employer, circle, health, pm2 config
+├── ui/                           # Next.js operator UI
+└── .agents/                      # Local skills and grant/adoption docs
+```
 
-1. Fill [.env](.env) from [.env.example](.env.example) with Arc RPC/key/token values.
+## Developer Setup (Full Path)
+
+1. Fill `.env` from `.env.example`.
 2. Deploy contracts:
-   - `npm run deploy:arc -w @arc-s3/contracts`
+
+```bash
+npm run deploy:arc -w @arc-s3/contracts
+```
+
 3. Bootstrap firewall, validator roles, and identities:
-   - `npm run bootstrap:arc -w @arc-s3/contracts`
-4. If needed, sync identities again:
-   - `npm run register:identities:arc -w @arc-s3/contracts`
 
----
+```bash
+npm run bootstrap:arc -w @arc-s3/contracts
+```
 
-## Circle Agent Wallet Integration
+4. Optional identity resync:
 
-This repository now includes Circle agent-wallet support for setup, funding, spending-policy checks, service discovery/pay, and Arc identity syncing.
+```bash
+npm run register:identities:arc -w @arc-s3/contracts
+```
 
-### Onboarding Steps (After Clone)
+## Runtime Commands
 
-To get started with Circle wallets and agent skills quickly, follow these steps:
+Demo and agents:
 
-1. Install dependencies:
-   - `npm install`
-2. Install agent skills & prepare execution context:
-   - `npm run circle:setup`
-3. Inspect current wallet funding and session status:
-   - `npm run circle:status`
+- `npm run demo`
+- `npm run demo:clean`
+- `npm run demo:continuous`
+- `npm run demo:manual`
+- `npm run agent:rfb5`
+- `npm run agent:rfb6`
+- `npm run agent:rfb6:autopilot`
 
-### Circle session note (testnet)
+Ops and health:
 
-- Circle sessions are environment-scoped. If you switch between mainnet and testnet, authenticate and verify wallet state in the target environment before running agents.
-- For Arc testnet runs, re-check wallet limits and available balance using `npm run circle:status` and top up with `npm run circle:fund` as needed.
+- `npm run autopilot:up`
+- `npm run autopilot:health`
+- `npm run autopilot:status`
+- `npm run autopilot:logs`
+- `npm run autopilot:down`
 
-### Enable policy guardrails for agents
+The PM2 profile is defined at [scripts/ecosystem.config.cjs](scripts/ecosystem.config.cjs).
 
-Set these in [.env](.env):
+## Contributing
 
-- `CIRCLE_POLICY_ENFORCE=true`
-- `CIRCLE_WALLET_CHAIN=BASE`
-- `CIRCLE_POLICY_REQUIRE_STATUS=true`
-- `CIRCLE_POLICY_REQUIRE_LIMITS=true`
-- optional thresholds: `CIRCLE_POLICY_MIN_PER_TX_USDC`, `CIRCLE_POLICY_MIN_DAILY_USDC`
+We welcome code, docs, integrations, and validation feedback.
 
-When enabled, `rfb5` and `rfb6` processes verify Circle session + wallet limits before running.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full contributor workflow, PR checklist, and validation commands.
 
-RFB5 can now optionally submit profitable opportunities on-chain through `S3IntentFirewall -> S3EscrowCourthouse.forwardCreateTaskV2` by enabling:
+Suggested contribution flow:
 
-- `RFB5_ONCHAIN_EXECUTE=true`
+1. Open an issue describing problem, scope, and expected behavior.
+2. Create a focused branch with one logical change set.
+3. Run relevant checks locally (`npm run test`, `npm run typecheck`, and target workspace checks).
+4. Submit a PR with reproducible verification steps and risk notes.
 
-Safety controls for RFB5 on-chain execution:
+Contribution priorities:
 
-- `RFB5_ONCHAIN_DRY_RUN`
-- `RFB5_ONCHAIN_MAX_TASKS_PER_RUN`
-- `RFB5_ONCHAIN_SIZE_SCALE`
-- `RFB5_ONCHAIN_MIN_PAYMENT_USDC6`
-- `RFB5_ONCHAIN_MAX_PAYMENT_USDC6`
-- `RFB5_ONCHAIN_DAILY_NOTIONAL_CAP_USDC6`
+- additional validator policy modules
+- clearer trace schemas and forensic tooling
+- external agent SDK packaging and examples
+- reliability and performance hardening for long-running autopilot
 
-### RFB5 on-chain live behavior notes
+## Security and Responsible Disclosure
 
-- Intent deadline default for RFB5 is `INTENT_DEFAULT_DEADLINE_SECONDS=600`.
-- Market fetches use retry + timeout handling to reduce transient `ECONNRESET`/hang-up impact.
-- The process keeps running through uncaught promise/network errors and logs them for review.
-- Payment sizing is balance-aware: capped by configured max, spendable follower USDC, and minimum payment threshold.
-- Common skip reasons now include `daily-notional-cap`, `insufficient-follower-usdc-balance`, and `payment-below-min`.
+See [SECURITY.md](SECURITY.md) for the responsible disclosure process.
 
-### Testnet cap profiles
+If you find a security issue, please do not post exploit details publicly first.
 
-- Safe smoke: `RFB5_ONCHAIN_DAILY_NOTIONAL_CAP_USDC6=2000000` (2 USDC/day)
-- Live soak (recommended): `RFB5_ONCHAIN_DAILY_NOTIONAL_CAP_USDC6=100000000` (100 USDC/day)
+Open a private disclosure path with maintainers and include:
 
-### Circle operational commands
+- affected component
+- impact assessment
+- reproduction steps
+- suggested mitigation
 
-- Install skills + prep CLI: `npm run circle:setup`
-- Inspect wallet/session/limits: `npm run circle:status`
-- Fund wallet: `npm run circle:fund`
-- Search paid services: `npm run circle:services:search`
-- Inspect + pay service: `npm run circle:services:pay`
+## Grant Roadmap and Use of Funds
 
-### Sync Circle wallet to Arc ERC-8004 identity
+Planned milestones for OSS grant execution:
 
-1. Set identity target in [.env](.env):
-   - `CIRCLE_AGENT_ERC8004_ID=erc8004:arc:rfb5` (or another id)
-2. Optionally pin wallet address:
-   - `CIRCLE_AGENT_WALLET_ADDRESS=0x...`
-3. Run sync:
-   - `npm run circle:sync:identity`
+1. SDK Packaging and Integrator Docs
+   - publish a clean external agent SDK wrapper
+   - add language-specific quickstarts and examples
+2. Verifiability and Observability
+   - improve UI evidence linking and lifecycle integrity checks
+   - add stronger benchmark and reliability reporting
+3. Ecosystem Adoption
+   - onboarding playbooks for third-party agent builders
+   - public integration demos and contributor growth loops
 
-The sync command reads the Circle agent wallet (or uses the forced address) and registers it in `S3AgentIdentityRegistry` if the ERC-8004 id is not yet mapped.
+Success metrics:
 
----
+- external agent integrations completed
+- reproducible end-to-end settlement demos
+- contributor throughput and issue resolution cadence
 
-## RFB5 Live Soak Runbook
+## License
 
-1. Set live execution knobs in [.env](.env):
-   - `RFB5_ONCHAIN_EXECUTE=true`
-   - `RFB5_ONCHAIN_DRY_RUN=false`
-   - `RFB5_ONCHAIN_DAILY_NOTIONAL_CAP_USDC6=100000000`
-2. Run the process:
-   - `npm run agent:rfb5 -w @arc-s3/rfb5-agent`
-3. Follow executor output:
-   - `tail -f simulation/data/agents/rfb5-sports-arb-executor.jsonl`
-4. After a soak window, summarize outcomes:
-   - `tail -n 400 simulation/data/agents/rfb5-sports-arb-executor.jsonl | rg '"status":"(submitted|skipped|error)"'`
-
-To reset daily spend accounting during test loops, remove `simulation/data/agents/rfb5-sports-arb-executor-state.json` (Wait: do not link to non-existent state files unless they exist, but this is a path reference under guidance: if they don't exist, we keep them plain text format or link carefully. Let's keep it as is or link if the directory exists).
-
+Licensed under the [MIT License](LICENSE).

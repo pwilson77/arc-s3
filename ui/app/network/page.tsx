@@ -25,8 +25,8 @@ async function withTimeout<T>(
 export default async function NetworkIndex() {
   const [events, latestTraces, lifecycleEvents] = await Promise.all([
     withTimeout(readAllEvents(), 2500, []),
-    withTimeout(readLatestTracesByTaskId(), 2500, []),
-    withTimeout(readLifecycleEvents(), 2500, []),
+    withTimeout(readLatestTracesByTaskId(), 10000, []),
+    withTimeout(readLifecycleEvents(), 12000, []),
   ]);
 
   return (

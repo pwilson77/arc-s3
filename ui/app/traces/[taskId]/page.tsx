@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findTraceByTaskId } from "@/lib/traces";
+import { readLifecycleEvents } from "@/lib/lifecycle";
 import { PageHeader } from "../../_components/PageHeader";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 5;
+
+const ARC_EXPLORER_BASE_URL = (
+  process.env.NEXT_PUBLIC_ARC_EXPLORER_URL ?? "https://testnet.arcscan.app"
+).replace(/\/$/, "");
 
 export default async function TracePage({
   params,
@@ -12,10 +17,16 @@ export default async function TracePage({
   params: { taskId: string };
 }) {
   const taskId = decodeURIComponent(params.taskId);
-  const trace = await findTraceByTaskId(taskId);
+  const [trace, lifecycleEvents] = await Promise.all([
+    findTraceByTaskId(taskId),
+    readLifecycleEvents(),
+  ]);
   if (!trace) notFound();
 
   const malformed = trace.integrity.malformed;
+  const taskLifecycleEvents = lifecycleEvents
+    .filter((event) => event.taskId === taskId)
+    .sort((a, b) => a.blockNumber - b.blockNumber);
 
   return (
     <div>
@@ -87,8 +98,57 @@ export default async function TracePage({
         <KV k="outputHash" v={trace.result.outputHash} />
         <KV k="details" v={trace.result.details} />
       </Section>
+
+      <Section title="blockchain transactions">
+        {taskLifecycleEvents.length === 0 ? (
+          <div className="text-neutral-500 text-sm">
+            No lifecycle transaction receipts are available for this task yet.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {taskLifecycleEvents.map((event) => (
+              <div
+                key={`${event.stage}:${event.txHash}`}
+                className="grid grid-cols-1 md:grid-cols-[8rem_1fr_auto] gap-2 text-sm"
+              >
+                <div className="text-neutral-500 font-mono text-xs uppercase tracking-wider">
+                  {event.stage}
+                </div>
+                <div className="min-w-0">
+                  <a
+                    href={`${ARC_EXPLORER_BASE_URL}/tx/${event.txHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-neutral-100 hover:underline break-all"
+                  >
+                    {formatHash(event.txHash)}
+                  </a>
+                  <div className="text-xs text-neutral-500">
+                    {event.blockTimestamp
+                      ? new Date(event.blockTimestamp).toLocaleString()
+                      : "—"}
+                  </div>
+                </div>
+                <a
+                  href={`${ARC_EXPLORER_BASE_URL}/block/${event.blockNumber}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-neutral-400 hover:text-neutral-200 hover:underline font-mono"
+                >
+                  block {event.blockNumber}
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
     </div>
   );
+}
+
+function formatHash(value: string) {
+  if (value.length <= 22) return value;
+  return `${value.slice(0, 14)}…${value.slice(-8)}`;
 }
 
 function Section({

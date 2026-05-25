@@ -10,4 +10,4 @@ broadcast/
 .env.local
 .DS_Store
 simulation/data/
-.agents/skills/
+.agents/
