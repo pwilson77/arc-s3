@@ -52,6 +52,11 @@ jobs:
         working-directory: video
         run: npm ci
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
       - name: Validate capture inputs
         run: |
           set -euo pipefail
