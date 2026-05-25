@@ -11,3 +11,11 @@ broadcast/
 .DS_Store
 simulation/data/
 .agents/
+
+# Generated Remotion render assets (local/CI ephemeral)
+video/public/captures/*.mp4
+video/public/captures/terminal-frames/
+video/public/captures/ui-frames/
+
+# Generated TechDemo voice clips
+video/public/vo/tech-*.mp3
