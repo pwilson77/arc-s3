@@ -69,11 +69,17 @@ jobs:
       - name: Download capture MP4s (optional)
         if: ${{ inputs.terminal_capture_url != '' && inputs.ui_capture_url != '' }}
         working-directory: projects/arc-s3/video
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p public/captures
-          curl -L --fail "${{ inputs.terminal_capture_url }}" -o public/captures/arc-s3-terminal-output.hd.mp4
-          curl -L --fail "${{ inputs.ui_capture_url }}" -o public/captures/arc-s3-ui-walkthrough.hd.mp4
+          AUTH_ARGS=()
+          if [[ -n "${BLOB_READ_WRITE_TOKEN:-}" ]]; then
+            AUTH_ARGS=(-H "Authorization: Bearer ${BLOB_READ_WRITE_TOKEN}")
+          fi
+          curl -L --fail "${AUTH_ARGS[@]}" "${{ inputs.terminal_capture_url }}" -o public/captures/arc-s3-terminal-output.hd.mp4
+          curl -L --fail "${AUTH_ARGS[@]}" "${{ inputs.ui_capture_url }}" -o public/captures/arc-s3-ui-walkthrough.hd.mp4
 
       - name: Extract frame sequences
         if: ${{ inputs.terminal_capture_url != '' && inputs.ui_capture_url != '' }}
