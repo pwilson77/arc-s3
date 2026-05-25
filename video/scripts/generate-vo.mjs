@@ -32,6 +32,12 @@ function loadEnv(file) {
 
 loadEnv(envPath);
 
+function getArgValue(name) {
+  const i = process.argv.indexOf(name);
+  if (i === -1) return undefined;
+  return process.argv[i + 1];
+}
+
 const API_KEY = process.env.ELEVENLABS_API_KEY;
 const VOICE_ID = process.env.ELEVENLABS_VOICE_ID;
 if (!API_KEY || !VOICE_ID) {
@@ -39,7 +45,12 @@ if (!API_KEY || !VOICE_ID) {
   process.exit(1);
 }
 
-const scriptPath = path.join(__dirname, "vo-script.json");
+const scriptFile = getArgValue("--script") || "vo-script.json";
+const scriptPath = path.join(__dirname, scriptFile);
+if (!fs.existsSync(scriptPath)) {
+  console.error(`Voice script not found: ${scriptPath}`);
+  process.exit(1);
+}
 const script = JSON.parse(fs.readFileSync(scriptPath, "utf8"));
 const outDir = path.join(videoRoot, "public", "vo");
 fs.mkdirSync(outDir, { recursive: true });
@@ -72,6 +83,8 @@ async function synth(scene) {
   return { id: scene.id, file: `vo/${scene.id}.mp3`, bytes: buf.length };
 }
 
+const onlyArg = getArgValue("--only");
+const onlySet = onlyArg ? new Set(onlyArg.split(",").map((s) => s.trim())) : null;
 const manifest = {
   generatedAt: new Date().toISOString(),
   voiceId: VOICE_ID,
@@ -79,6 +92,9 @@ const manifest = {
   scenes: [],
 };
 for (const scene of script.scenes) {
+  if (onlySet && !onlySet.has(scene.id)) {
+    continue;
+  }
   process.stdout.write(`→ ${scene.id} ... `);
   const entry = await synth(scene);
   manifest.scenes.push(entry);

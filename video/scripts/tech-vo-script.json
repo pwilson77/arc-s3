@@ -1,0 +1,47 @@
+{
+  "model_id": "eleven_turbo_v2_5",
+  "voice_settings": {
+    "stability": 0.55,
+    "similarity_boost": 0.78,
+    "style": 0.18,
+    "use_speaker_boost": true
+  },
+  "scenes": [
+    {
+      "id": "tech-1-paradigm",
+      "text": "Re-evaluating Arc S three. The unfair advantage use case. In the emerging agent economy, Arc S three represents a critical paradigm shift."
+    },
+    {
+      "id": "tech-2-usecase",
+      "text": "Developers are building brilliant agents that trade, analyze, and execute complex workflows. But multi-agent collaboration still lacks a trust layer. If Agent A buys an analysis payload from Agent B and B fails to deliver, Agent A loses capital."
+    },
+    {
+      "id": "tech-3-zero-member-llc",
+      "text": "Arc S three is the on-chain legal and economic substrate for software agents. It operationalizes the zero-member L L C concept as a software-governed entity, directly on Arc with sub-second finality and predictable U S D C gas."
+    },
+    {
+      "id": "tech-4-firewall",
+      "text": "Enforce compliance. The Intent Firewall blocks catastrophic parameter and slippage errors before execution reaches the chain."
+    },
+    {
+      "id": "tech-5-escrow",
+      "text": "Transact safely. The slash-bonded Escrow Courthouse holds performance bonds and automatically slashes bad actors when reasoning traces fail integrity or policy checks."
+    },
+    {
+      "id": "tech-6-reputation",
+      "text": "Build standing. The Reputation Registry records outcomes with time-weighted decay so agents accumulate institutional trust from actual settlement behavior."
+    },
+    {
+      "id": "tech-7-demo-clean",
+      "text": "Here we run npm run demo clean from a fresh state. The script first resets the local stack and spins up the Arc S three services. Then it registers the employer, worker, and validator on chain. The employer publishes a bonded task with a precise payload spec and posts collateral. The worker picks up the task, executes the workload, and submits a signed result along with a reasoning trace. The validator inspects the trace, verifies the payload against policy, and settles the agreement on chain, producing the on-chain artifact for that lifecycle. Funds release to the worker. Reputation updates for every participant. This is a full end-to-end lifecycle in under one command, with native U S D C economics and sub-second finality."
+    },
+    {
+      "id": "tech-8-ui-walkthrough",
+      "text": "Now the U I walkthrough. We start on the Arc S three homepage, which surfaces the active roster of agents and a live feed of settled lifecycles. From there we navigate into Networks. The networks view lists every active agreement, its bond size, and its current lifecycle stage. We click the first artifact in the list to open its detail page. Inside the artifact we can inspect the reasoning trace step by step, see the validator's policy checks, and follow the on chain settlement transaction. Finally we jump to the Dashboard, which aggregates settled volume, slashed bonds, and time-weighted reputation across the whole roster. Every step the demo executed is independently verifiable from this U I."
+    },
+    {
+      "id": "tech-9-outro",
+      "text": "Arc S three is live now on Arc testnet. Builders, integrate your agents. Operators, verify every lifecycle with evidence. Counterparties can finally trust software through bonded execution and on-chain reputation."
+    }
+  ]
+}

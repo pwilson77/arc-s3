@@ -24,8 +24,11 @@
   "scripts": {
     "dev": "remotion studio",
     "build": "remotion bundle",
-    "render": "remotion render Main out/arc-s3.mp4",
+    "render": "remotion render TechDemo out/arc-s3-tech-demo.mp4 --concurrency=1",
+    "render:main": "remotion render Main out/arc-s3.mp4",
+    "render:tech": "remotion render TechDemo out/arc-s3-tech-demo.mp4 --concurrency=1",
     "vo": "node scripts/generate-vo.mjs",
+    "vo:tech": "node scripts/generate-vo.mjs --script tech-vo-script.json",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc"
   },

@@ -1,0 +1,137 @@
+name: Render Tech Demo (Remotion)
+
+on:
+  workflow_dispatch:
+    inputs:
+      composition:
+        description: Remotion composition name
+        required: true
+        default: TechDemo
+        type: string
+      output_name:
+        description: Output file name
+        required: true
+        default: arc-s3-tech-demo.mp4
+        type: string
+      concurrency:
+        description: Remotion concurrency (1-8)
+        required: true
+        default: "4"
+        type: string
+      generate_vo:
+        description: Generate VO via ElevenLabs secrets
+        required: true
+        default: true
+        type: boolean
+      terminal_capture_url:
+        description: Optional URL to terminal capture MP4
+        required: false
+        type: string
+      ui_capture_url:
+        description: Optional URL to UI walkthrough capture MP4
+        required: false
+        type: string
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: projects/arc-s3/video/package-lock.json
+
+      - name: Install dependencies
+        working-directory: projects/arc-s3/video
+        run: npm ci
+
+      - name: Validate capture inputs
+        run: |
+          set -euo pipefail
+          TERM_URL="${{ inputs.terminal_capture_url }}"
+          UI_URL="${{ inputs.ui_capture_url }}"
+          if [[ -n "$TERM_URL" && -z "$UI_URL" ]]; then
+            echo "terminal_capture_url provided without ui_capture_url"
+            exit 1
+          fi
+          if [[ -z "$TERM_URL" && -n "$UI_URL" ]]; then
+            echo "ui_capture_url provided without terminal_capture_url"
+            exit 1
+          fi
+
+      - name: Download capture MP4s (optional)
+        if: ${{ inputs.terminal_capture_url != '' && inputs.ui_capture_url != '' }}
+        working-directory: projects/arc-s3/video
+        run: |
+          set -euo pipefail
+          mkdir -p public/captures
+          curl -L --fail "${{ inputs.terminal_capture_url }}" -o public/captures/arc-s3-terminal-output.hd.mp4
+          curl -L --fail "${{ inputs.ui_capture_url }}" -o public/captures/arc-s3-ui-walkthrough.hd.mp4
+
+      - name: Extract frame sequences
+        if: ${{ inputs.terminal_capture_url != '' && inputs.ui_capture_url != '' }}
+        working-directory: projects/arc-s3/video
+        run: |
+          set -euo pipefail
+          mkdir -p public/captures/terminal-frames public/captures/ui-frames
+          ffmpeg -y -i public/captures/arc-s3-terminal-output.hd.mp4 -vf fps=30 public/captures/terminal-frames/%05d.png
+          ffmpeg -y -i public/captures/arc-s3-ui-walkthrough.hd.mp4 -vf fps=30 public/captures/ui-frames/%05d.png
+
+      - name: Assert frame assets exist
+        working-directory: projects/arc-s3/video
+        run: |
+          set -euo pipefail
+          test -f public/captures/terminal-frames/00001.png || (echo "Missing terminal frames. Commit frames or provide capture URLs." && exit 1)
+          test -f public/captures/ui-frames/00001.png || (echo "Missing UI frames. Commit frames or provide capture URLs." && exit 1)
+
+      - name: Generate VO (optional)
+        if: ${{ inputs.generate_vo }}
+        working-directory: projects/arc-s3/video
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ELEVENLABS_API_KEY:-}" || -z "${ELEVENLABS_VOICE_ID:-}" ]]; then
+            echo "Missing ELEVENLABS_API_KEY or ELEVENLABS_VOICE_ID repository secrets"
+            exit 1
+          fi
+          npm run vo:tech
+
+      - name: Assert VO assets exist
+        working-directory: projects/arc-s3/video
+        run: |
+          set -euo pipefail
+          for clip in \
+            tech-1-paradigm \
+            tech-2-usecase \
+            tech-3-zero-member-llc \
+            tech-4-firewall \
+            tech-5-escrow \
+            tech-6-reputation \
+            tech-7-demo-clean \
+            tech-8-ui-walkthrough \
+            tech-9-outro
+          do
+            test -f "public/vo/${clip}.mp3" || (echo "Missing public/vo/${clip}.mp3" && exit 1)
+          done
+
+      - name: Render composition
+        working-directory: projects/arc-s3/video
+        run: |
+          mkdir -p out
+          npx remotion render "${{ inputs.composition }}" "out/${{ inputs.output_name }}" --concurrency="${{ inputs.concurrency }}"
+
+      - name: Upload rendered video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: remotion-${{ inputs.composition }}
+          path: projects/arc-s3/video/out/${{ inputs.output_name }}
+          if-no-files-found: error
