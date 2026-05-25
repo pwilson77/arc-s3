@@ -118,7 +118,11 @@ const IntroSlide: React.FC = () => {
   const { fps } = useVideoConfig();
   const t = frame / fps;
 
-  const heroIn = spring({ frame, fps, config: { damping: 200, stiffness: 80 } });
+  const heroIn = spring({
+    frame,
+    fps,
+    config: { damping: 200, stiffness: 80 },
+  });
   const heroOut = interpolate(t, [PHASE.hero[1] - 1.5, PHASE.hero[1]], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -368,7 +372,10 @@ const UsecaseStage: React.FC<{
   );
 };
 
-const AgentNode: React.FC<{ label: string; sub: string }> = ({ label, sub }) => (
+const AgentNode: React.FC<{ label: string; sub: string }> = ({
+  label,
+  sub,
+}) => (
   <div
     style={{
       width: 480 * SCALE,
@@ -537,8 +544,8 @@ const SubstrateStage: React.FC<{ tSeconds: number; progress: number }> = ({
           maxWidth: 2200 * SCALE,
         }}
       >
-        Firewall + Courthouse + Registry as programmable governance —
-        backed by Arc finality and USDC gas.
+        Firewall + Courthouse + Registry as programmable governance — backed by
+        Arc finality and USDC gas.
       </div>
 
       <div
@@ -570,12 +577,10 @@ const Pillar: React.FC<{
   revealAt: number;
   tSeconds: number;
 }> = ({ title, detail, revealAt, tSeconds }) => {
-  const reveal = interpolate(
-    tSeconds,
-    [revealAt, revealAt + 1.2],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
+  const reveal = interpolate(tSeconds, [revealAt, revealAt + 1.2], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   const lift = interpolate(reveal, [0, 1], [60 * SCALE, 0]);
   const glowHex = Math.round(reveal * 128)
     .toString(16)

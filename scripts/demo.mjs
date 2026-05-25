@@ -18,6 +18,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, unlinkSync } from "node:fs";
 import { resolve } from "node:path";
+import { validateEnv } from "./validate-env.mjs";
 
 function loadDotenv(path) {
   if (!existsSync(path)) return;
@@ -366,6 +367,9 @@ function shutdown(exitCode = 0) {
 
 process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
+
+// Pre-flight checks before initializing processes.
+validateEnv();
 
 preflight();
 if (CLEAN) cleanState();

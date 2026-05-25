@@ -84,7 +84,9 @@ async function synth(scene) {
 }
 
 const onlyArg = getArgValue("--only");
-const onlySet = onlyArg ? new Set(onlyArg.split(",").map((s) => s.trim())) : null;
+const onlySet = onlyArg
+  ? new Set(onlyArg.split(",").map((s) => s.trim()))
+  : null;
 const manifest = {
   generatedAt: new Date().toISOString(),
   voiceId: VOICE_ID,
