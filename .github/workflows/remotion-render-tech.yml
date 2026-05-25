@@ -140,6 +140,42 @@ jobs:
           mkdir -p out
           npx remotion render "${{ inputs.composition }}" "out/${{ inputs.output_name }}" --concurrency="${{ inputs.concurrency }}"
 
+      - name: Backup rendered video to Vercel Blob
+        if: ${{ success() && secrets.BLOB_READ_WRITE_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          npm --prefix video install --no-save @vercel/blob@2.4.0
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          async function main() {
+            const { put } = await import('@vercel/blob');
+            const fileName = process.env.OUTPUT_NAME;
+            const runId = process.env.GITHUB_RUN_ID;
+            const src = path.join(process.cwd(), 'video', 'out', fileName);
+            const body = fs.readFileSync(src);
+            const blobPath = `arc-s3/renders/${runId}-${fileName}`;
+            const res = await put(blobPath, body, {
+              access: 'private',
+              addRandomSuffix: false,
+              contentType: 'video/mp4',
+            });
+            console.log(`Backup blob path: ${res.pathname}`);
+            console.log(`Backup blob url: ${res.url}`);
+            console.log(`Backup blob downloadUrl: ${res.downloadUrl}`);
+          }
+
+          main().catch((err) => {
+            console.error(err?.message || err);
+            process.exit(1);
+          });
+          NODE
+        env:
+          OUTPUT_NAME: ${{ inputs.output_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+
       - name: Upload rendered video artifact
         uses: actions/upload-artifact@v4
         with:
