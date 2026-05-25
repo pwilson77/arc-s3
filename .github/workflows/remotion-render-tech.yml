@@ -49,7 +49,7 @@ jobs:
           cache-dependency-path: video/package-lock.json
 
       - name: Install dependencies
-        working-directory: projects/arc-s3/video
+        working-directory: video
         run: npm ci
 
       - name: Validate capture inputs
@@ -68,7 +68,7 @@ jobs:
 
       - name: Download capture MP4s (optional)
         if: ${{ inputs.terminal_capture_url != '' && inputs.ui_capture_url != '' }}
-        working-directory: projects/arc-s3/video
+        working-directory: video
         env:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
         run: |
@@ -83,7 +83,7 @@ jobs:
 
       - name: Extract frame sequences
         if: ${{ inputs.terminal_capture_url != '' && inputs.ui_capture_url != '' }}
-        working-directory: projects/arc-s3/video
+        working-directory: video
         run: |
           set -euo pipefail
           mkdir -p public/captures/terminal-frames public/captures/ui-frames
@@ -91,7 +91,7 @@ jobs:
           ffmpeg -y -i public/captures/arc-s3-ui-walkthrough.hd.mp4 -vf fps=30 public/captures/ui-frames/%05d.png
 
       - name: Assert frame assets exist
-        working-directory: projects/arc-s3/video
+        working-directory: video
         run: |
           set -euo pipefail
           test -f public/captures/terminal-frames/00001.png || (echo "Missing terminal frames. Commit frames or provide capture URLs." && exit 1)
@@ -99,7 +99,7 @@ jobs:
 
       - name: Generate VO (optional)
         if: ${{ inputs.generate_vo }}
-        working-directory: projects/arc-s3/video
+        working-directory: video
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
@@ -112,7 +112,7 @@ jobs:
           npm run vo:tech
 
       - name: Assert VO assets exist
-        working-directory: projects/arc-s3/video
+        working-directory: video
         run: |
           set -euo pipefail
           for clip in \
@@ -130,7 +130,7 @@ jobs:
           done
 
       - name: Render composition
-        working-directory: projects/arc-s3/video
+        working-directory: video
         run: |
           mkdir -p out
           npx remotion render "${{ inputs.composition }}" "out/${{ inputs.output_name }}" --concurrency="${{ inputs.concurrency }}"
