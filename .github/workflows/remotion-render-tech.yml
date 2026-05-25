@@ -52,10 +52,18 @@ jobs:
         working-directory: video
         run: npm ci
 
-      - name: Install ffmpeg
+      - name: Ensure ffmpeg is available
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          set -euo pipefail
+          if command -v ffmpeg >/dev/null 2>&1; then
+            ffmpeg -version | head -n 1
+            exit 0
+          fi
+
+          export DEBIAN_FRONTEND=noninteractive
+          timeout 300 sudo apt-get update -o Acquire::Retries=3
+          timeout 300 sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -n 1
 
       - name: Validate capture inputs
         run: |
