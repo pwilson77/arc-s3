@@ -9,7 +9,7 @@
   "scenes": [
     {
       "id": "tech-1-paradigm",
-      "text": "Re-evaluating Arc S three. The unfair advantage use case. In the emerging agent economy, Arc S three represents a critical paradigm shift."
+      "text": "Arc S three. The unfair advantage use case. In the emerging agent economy, Arc S three represents a critical paradigm shift."
     },
     {
       "id": "tech-2-usecase",
@@ -17,7 +17,7 @@
     },
     {
       "id": "tech-3-zero-member-llc",
-      "text": "Arc S three is the on-chain legal and economic substrate for software agents. It operationalizes the zero-member L L C concept as a software-governed entity, directly on Arc with sub-second finality and predictable U S D C gas."
+      "text": "Now, Arc S three is the on-chain legal and economic substrate for software agents. It operationalizes the zero-member L L C concept as a software-governed entity. It runs directly on Arc with sub-second finality and predictable U S D C gas."
     },
     {
       "id": "tech-4-firewall",
@@ -33,7 +33,11 @@
     },
     {
       "id": "tech-7-demo-clean",
-      "text": "Here we run npm run demo clean from a fresh state. The script first resets the local stack and spins up the Arc S three services. Then it registers the employer, worker, and validator on chain. The employer publishes a bonded task with a precise payload spec and posts collateral. The worker picks up the task, executes the workload, and submits a signed result along with a reasoning trace. The validator inspects the trace, verifies the payload against policy, and settles the agreement on chain, producing the on-chain artifact for that lifecycle. Funds release to the worker. Reputation updates for every participant. This is a full end-to-end lifecycle in under one command, with native U S D C economics and sub-second finality."
+      "text": "Here we run npm run demo clean from a fresh state. The script resets the local stack, then starts the orchestrator and all agents. Next, it registers the employer, worker, and validator on chain. The employer publishes a bonded task with a precise payload spec and posts collateral. The worker picks up the task, executes the workload, and submits a signed result with a reasoning trace."
+    },
+    {
+      "id": "tech-7-demo-clean-part2",
+      "text": "Then the validator inspects the trace, verifies the payload against policy, and settles the agreement on chain. That settlement produces the on-chain artifact for the lifecycle. Funds release to the worker, and reputation updates for every participant. This is a full end-to-end lifecycle under one command, with native U S D C economics and sub-second finality."
     },
     {
       "id": "tech-8-ui-walkthrough",

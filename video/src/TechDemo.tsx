@@ -18,10 +18,10 @@ export const TECH_DEMO_HEIGHT = 2160;
 const SCALE = 2;
 
 const SCENE_SECONDS = {
-  intro: 83,
+  intro: 80,
   demoClean: 58,
   uiWalkthrough: 82,
-  outro: 12,
+  outro: 16,
 };
 
 const s = (sec: number) => Math.round(sec * TECH_DEMO_FPS);
@@ -37,11 +37,11 @@ const vo = (id: string) => staticFile(`vo/${id}.mp3`);
 
 const INTRO_VO_TIMELINE = [
   { id: "tech-1-paradigm", at: 0 },
-  { id: "tech-2-usecase", at: 16 },
-  { id: "tech-3-zero-member-llc", at: 34 },
-  { id: "tech-4-firewall", at: 50 },
-  { id: "tech-5-escrow", at: 61 },
-  { id: "tech-6-reputation", at: 72 },
+  { id: "tech-2-usecase", at: 9.5 },
+  { id: "tech-3-zero-member-llc", at: 27.5 },
+  { id: "tech-4-firewall", at: 47.5 },
+  { id: "tech-5-escrow", at: 56 },
+  { id: "tech-6-reputation", at: 68 },
 ] as const;
 
 export const TechDemo: React.FC = () => {
@@ -70,7 +70,12 @@ export const TechDemo: React.FC = () => {
           badge="Terminal Capture"
           frameDir="captures/terminal-frames"
         />
-        <Audio src={vo("tech-7-demo-clean")} />
+        <Sequence from={0}>
+          <Audio src={vo("tech-7-demo-clean")} />
+        </Sequence>
+        <Sequence from={s(28)}>
+          <Audio src={vo("tech-7-demo-clean-part2")} />
+        </Sequence>
       </Sequence>
       {(() => {
         start += s(SCENE_SECONDS.demoClean);
@@ -100,12 +105,12 @@ export const TechDemo: React.FC = () => {
 };
 
 const PHASE = {
-  hero: [0, 16],
-  usecase: [16, 34],
-  substrate: [34, 50],
-  firewall: [50, 61],
-  escrow: [61, 72],
-  reputation: [72, 83],
+  hero: [0, 9.5],
+  usecase: [9.5, 27.5],
+  substrate: [27.5, 47.5],
+  firewall: [47.5, 56],
+  escrow: [56, 68],
+  reputation: [68, 80],
 } as const;
 
 const IntroSlide: React.FC = () => {

@@ -136,6 +136,7 @@ jobs:
             tech-5-escrow \
             tech-6-reputation \
             tech-7-demo-clean \
+            tech-7-demo-clean-part2 \
             tech-8-ui-walkthrough \
             tech-9-outro
           do

@@ -19,3 +19,4 @@ video/public/captures/ui-frames/
 
 # Generated TechDemo voice clips
 video/public/vo/tech-*.mp3
+video/public/vo/debug/
